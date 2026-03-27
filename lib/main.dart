@@ -14,35 +14,96 @@ class AIGoalCoachApp extends StatelessWidget {
       title: 'AI 目标教练',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
+        // 自然亲和配色系统 - 森林绿 + 暖灰 + 珊瑚红
+        brightness: Brightness.light,
+        // 主色：森林绿
+        colorScheme: const ColorScheme(
           brightness: Brightness.light,
+          primary: Color(0xFF2D5A46),
+          onPrimary: Color(0xFFFFFFFF),
+          primaryContainer: Color(0xFFE8F5EF),
+          onPrimaryContainer: Color(0xFF0F1F18),
+          secondary: Color(0xFF87A892),
+          onSecondary: Color(0xFFFFFFFF),
+          secondaryContainer: Color(0xFFD1E8DC),
+          onSecondaryContainer: Color(0xFF1F3D30),
+          tertiary: Color(0xFFE07A5F),
+          onTertiary: Color(0xFFFFFFFF),
+          tertiaryContainer: Color(0xFFFFF5F3),
+          onTertiaryContainer: Color(0xFF3D1F18),
+          error: Color(0xFFC96859),
+          onError: Color(0xFFFFFFFF),
+          surface: Color(0xFFFFFFFF),
+          onSurface: Color(0xFF3D342B),
+          outline: Color(0xFFE6E2D8),
         ),
-        useMaterial3: true,
+        // 背景色：暖灰系
+        scaffoldBackgroundColor: const Color(0xFFFAF9F7),
         // 字体配置 - 根据 DESIGN.md
         textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
-          bodyLarge: GoogleFonts.dmSans(fontSize: 16),
-          bodyMedium: GoogleFonts.dmSans(fontSize: 14),
+          bodyLarge: GoogleFonts.dmSans(fontSize: 16, color: const Color(0xFF3D342B)),
+          bodyMedium: GoogleFonts.dmSans(fontSize: 14, color: const Color(0xFF7D7265)),
+          headlineLarge: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF3D342B)),
+          headlineMedium: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w600, color: const Color(0xFF3D342B)),
+          titleMedium: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF3D342B)),
+          labelSmall: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF7D7265)),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
+          backgroundColor: Color(0xFFFAF9F7),
+          foregroundColor: Color(0xFF3D342B),
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF3D342B),
+          ),
         ),
         cardTheme: CardThemeData(
-          elevation: 2,
-          shadowColor: Colors.black.withAlpha(26),
+          elevation: 0,
+          shadowColor: const Color(0xFF2D5A46).withOpacity(0.1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2D5A46),
+            foregroundColor: const Color(0xFFFFFFFF),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF2D5A46),
+            side: const BorderSide(color: Color(0xFF2D5A46)),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFFFFFFF),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFE6E2D8)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFE6E2D8)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF2D5A46), width: 2),
+          ),
+          contentPadding: const EdgeInsets.all(16),
+        ),
+        useMaterial3: true,
       ),
       home: const SplashScreen(),
     );
@@ -110,7 +171,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+            colors: [Color(0xFF2D5A46), Color(0xFF1F3D30)],
           ),
         ),
         child: Center(
@@ -220,7 +281,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+            colors: [Color(0xFF2D5A46), Color(0xFF1F3D30)],
           ),
         ),
         child: SafeArea(
@@ -334,8 +395,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF2563EB),
+                          backgroundColor: const Color(0xFFE07A5F),
+                          foregroundColor: const Color(0xFFFFFFFF),
                           elevation: 8,
                           shadowColor: Colors.black.withOpacity(0.2),
                         ),
@@ -389,17 +450,17 @@ class _HomeScreenState extends State<HomeScreen> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: Color(0xFF2563EB)),
+            selectedIcon: Icon(Icons.home, color: Color(0xFF2D5A46)),
             label: '首页',
           ),
           NavigationDestination(
             icon: Icon(Icons.check_circle_outline),
-            selectedIcon: Icon(Icons.check_circle, color: Color(0xFF2563EB)),
+            selectedIcon: Icon(Icons.check_circle, color: Color(0xFF2D5A46)),
             label: '打卡',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Color(0xFF2563EB)),
+            selectedIcon: Icon(Icons.person, color: Color(0xFF2D5A46)),
             label: '我的',
           ),
         ],
@@ -428,7 +489,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
@@ -460,13 +521,13 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB).withOpacity(0.1),
+                color: const Color(0xFF2D5A46).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(80),
               ),
               child: const Icon(
                 Icons.my_location_outlined,
                 size: 80,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF2D5A46),
               ),
             ),
             const SizedBox(height: 32),
@@ -573,8 +634,8 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       icon: const Icon(Icons.add),
                       label: const Text('创建新目标'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF2563EB),
-                        side: const BorderSide(color: Color(0xFF2563EB)),
+                        foregroundColor: const Color(0xFF2D5A46),
+                        side: const BorderSide(color: Color(0xFF2D5A46)),
                       ),
                     ),
                   ),
@@ -591,7 +652,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       icon: const Icon(Icons.people_outline),
                       label: const Text('查看学习伙伴'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF2563EB),
+                        foregroundColor: const Color(0xFF2D5A46),
                         side: const BorderSide(color: Color(0xFFE0E0E0)),
                       ),
                     ),
@@ -632,10 +693,10 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB).withOpacity(0.1),
+                      color: const Color(0xFF2D5A46).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
+                    child: Icon(icon, color: const Color(0xFF2D5A46), size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -651,7 +712,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF2D5A46),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -667,7 +728,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                 child: LinearProgressIndicator(
                   value: progress,
                   backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2D5A46)),
                   minHeight: 8,
                 ),
               ),
@@ -684,7 +745,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF2D5A46),
                     ),
                   ),
                 ],
@@ -748,7 +809,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       appBar: AppBar(
         title: Text('创建目标'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -779,7 +840,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: const BorderSide(color: Color(0xFF2D5A46), width: 2),
               ),
               contentPadding: const EdgeInsets.all(16),
             ),
@@ -857,7 +918,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 onSelected: (selected) {
                   if (selected) setState(() => _selectedTime = time);
                 },
-                selectedColor: const Color(0xFF2563EB),
+                selectedColor: const Color(0xFF2D5A46),
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.white : Colors.black87,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -879,7 +940,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 onSelected: (selected) {
                   if (selected) setState(() => _selectedLevel = level);
                 },
-                selectedColor: const Color(0xFF2563EB),
+                selectedColor: const Color(0xFF2D5A46),
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.white : Colors.black87,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -925,13 +986,13 @@ class GoalPreviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('创建目标'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(Icons.auto_awesome, size: 64, color: Color(0xFF2563EB)),
+            const Icon(Icons.auto_awesome, size: 64, color: Color(0xFF2D5A46)),
             const SizedBox(height: 24),
             const Text(
               'AI 为你生成了计划',
@@ -973,7 +1034,7 @@ class GoalPreviewScreen extends StatelessWidget {
                       child: const LinearProgressIndicator(
                         value: 0,
                         backgroundColor: Color(0xFFE0E0E0),
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2D5A46)),
                         minHeight: 8,
                       ),
                     ),
@@ -1091,7 +1152,7 @@ class CheckinScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('快速打卡'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
       ),
       body: Center(
         child: Padding(
@@ -1103,13 +1164,13 @@ class CheckinScreen extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withOpacity(0.1),
+                  color: const Color(0xFF2D5A46).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: const Icon(
                   Icons.check_circle_outline,
                   size: 60,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF2D5A46),
                 ),
               ),
               const SizedBox(height: 32),
@@ -1140,7 +1201,7 @@ class GoalDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('30 天读 5 本书'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1159,7 +1220,7 @@ class GoalDetailScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB),
+                            color: const Color(0xFF2D5A46),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text('60%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -1172,7 +1233,7 @@ class GoalDetailScreen extends StatelessWidget {
                       child: const LinearProgressIndicator(
                         value: 0.6,
                         backgroundColor: Color(0xFFE0E0E0),
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2D5A46)),
                         minHeight: 8,
                       ),
                     ),
@@ -1195,10 +1256,10 @@ class GoalDetailScreen extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB).withOpacity(0.2),
+                            color: const Color(0xFF2D5A46).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.menu_book, color: const Color(0xFF2563EB)),
+                          child: const Icon(Icons.menu_book, color: const Color(0xFF2D5A46)),
                         ),
                         const SizedBox(width: 16),
                         const Expanded(
@@ -1222,7 +1283,7 @@ class GoalDetailScreen extends StatelessWidget {
                         icon: const Icon(Icons.check_circle_outline),
                         label: const Text('打卡完成'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: const Color(0xFF2D5A46),
                         ),
                       ),
                     ),
@@ -1252,7 +1313,7 @@ class GoalDetailScreen extends StatelessWidget {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: completed ? Colors.green : (isToday ? const Color(0xFF2563EB) : Colors.grey[300]),
+            color: completed ? Colors.green : (isToday ? const Color(0xFF2D5A46) : Colors.grey[300]),
             shape: BoxShape.circle,
           ),
           child: completed
@@ -1356,7 +1417,7 @@ class CommunityScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('学习伙伴'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -1435,10 +1496,10 @@ class CommunityScreen extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB).withOpacity(0.1),
+            color: const Color(0xFF2D5A46).withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D5A46))),
         ),
       ),
     );
@@ -1455,7 +1516,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('我的'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2563EB),
+        foregroundColor: const Color(0xFF2D5A46),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1466,7 +1527,7 @@ class ProfileScreen extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)]),
+                gradient: const LinearGradient(colors: [Color(0xFFE07A5F), Color(0xFFD4A373)]),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: const Icon(Icons.person, size: 50, color: Colors.white),
@@ -1524,7 +1585,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2D5A46))),
         const SizedBox(height: 4),
         Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
       ],
@@ -1554,7 +1615,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildSettingItem(IconData icon, String title, {bool showBadge = false}) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF2563EB)),
+      leading: Icon(icon, color: const Color(0xFF2D5A46)),
       title: Text(title),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1563,7 +1624,7 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF2D5A46),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text('NEW', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
