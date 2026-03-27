@@ -1,6 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// ==================== 设计系统颜色常量（来自 DESIGN.md）====================
+class AppColors {
+  const AppColors._();
+
+  // 主色 - 森林绿
+  static const primary = Color(0xFF2D5A46);
+  static const primaryContainer = Color(0xFFE8F5EF);
+  static const onPrimaryContainer = Color(0xFF0F1F18);
+  static const primaryDark = Color(0xFF1F3D30);
+
+  // 辅色 - 鼠尾草绿
+  static const secondary = Color(0xFF87A892);
+  static const secondaryContainer = Color(0xFFD1E8DC);
+
+  // 点缀色 - 珊瑚红
+  static const tertiary = Color(0xFFE07A5F);
+  static const tertiaryContainer = Color(0xFFFFF5F3);
+  static const onTertiaryContainer = Color(0xFF3D1F18);
+
+  // 中性色 - 暖灰系
+  static const neutral50 = Color(0xFFFAF9F7);    // 主背景
+  static const neutral100 = Color(0xFFF2F0EB);   // 次级背景
+  static const neutral200 = Color(0xFFE6E2D8);   // 边框/分割线
+  static const neutral300 = Color(0xFFD4CFC6);   // 弱化边框
+  static const neutral400 = Color(0xFFB5ADA0);   // 弱化文字
+  static const neutral500 = Color(0xFF998F80);   // 次级文字
+  static const neutral600 = Color(0xFF7D7265);   // 次要文字
+  static const neutral700 = Color(0xFF5C5247);   // 强调文字
+  static const neutral800 = Color(0xFF4A3D32);   // 主要文字
+  static const neutral900 = Color(0xFF3D342B);   // 主要文字（深）
+
+  // 语义色
+  static const success = Color(0xFF4A7C59);
+  static const warning = Color(0xFFD4A373);
+  static const error = Color(0xFFC96859);
+  static const info = Color(0xFF6B9AC4);
+
+  // 功能色 - 卡片背景/强调背景
+  static const cardBackground = Color(0xFFF1F5F9);
+  static const inputBackground = Color(0xFFFFFFFF);
+}
+
 void main() {
   runApp(const AIGoalCoachApp());
 }
@@ -19,56 +61,56 @@ class AIGoalCoachApp extends StatelessWidget {
         // 主色：森林绿
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
-          primary: Color(0xFF2D5A46),
+          primary: AppColors.primary,
           onPrimary: Color(0xFFFFFFFF),
-          primaryContainer: Color(0xFFE8F5EF),
-          onPrimaryContainer: Color(0xFF0F1F18),
-          secondary: Color(0xFF87A892),
+          primaryContainer: AppColors.primaryContainer,
+          onPrimaryContainer: AppColors.onPrimaryContainer,
+          secondary: AppColors.secondary,
           onSecondary: Color(0xFFFFFFFF),
-          secondaryContainer: Color(0xFFD1E8DC),
-          onSecondaryContainer: Color(0xFF1F3D30),
-          tertiary: Color(0xFFE07A5F),
+          secondaryContainer: AppColors.secondaryContainer,
+          onSecondaryContainer: AppColors.primaryDark,
+          tertiary: AppColors.tertiary,
           onTertiary: Color(0xFFFFFFFF),
-          tertiaryContainer: Color(0xFFFFF5F3),
-          onTertiaryContainer: Color(0xFF3D1F18),
-          error: Color(0xFFC96859),
+          tertiaryContainer: AppColors.tertiaryContainer,
+          onTertiaryContainer: AppColors.onTertiaryContainer,
+          error: AppColors.error,
           onError: Color(0xFFFFFFFF),
-          surface: Color(0xFFFFFFFF),
-          onSurface: Color(0xFF3D342B),
-          outline: Color(0xFFE6E2D8),
+          surface: AppColors.inputBackground,
+          onSurface: AppColors.neutral900,
+          outline: AppColors.neutral200,
         ),
         // 背景色：暖灰系
-        scaffoldBackgroundColor: const Color(0xFFFAF9F7),
+        scaffoldBackgroundColor: AppColors.neutral50,
         // 字体配置 - 根据 DESIGN.md
         textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
-          bodyLarge: GoogleFonts.dmSans(fontSize: 16, color: const Color(0xFF3D342B)),
-          bodyMedium: GoogleFonts.dmSans(fontSize: 14, color: const Color(0xFF7D7265)),
-          headlineLarge: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold, color: const Color(0xFF3D342B)),
-          headlineMedium: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w600, color: const Color(0xFF3D342B)),
-          titleMedium: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600, color: const Color(0xFF3D342B)),
-          labelSmall: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF7D7265)),
+          bodyLarge: GoogleFonts.dmSans(fontSize: 16, color: AppColors.neutral900),
+          bodyMedium: GoogleFonts.dmSans(fontSize: 14, color: AppColors.neutral600),
+          headlineLarge: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.neutral900),
+          headlineMedium: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w600, color: AppColors.neutral900),
+          titleMedium: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.neutral900),
+          labelSmall: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.neutral600),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
-          backgroundColor: Color(0xFFFAF9F7),
-          foregroundColor: Color(0xFF3D342B),
+          backgroundColor: AppColors.neutral50,
+          foregroundColor: AppColors.neutral900,
           titleTextStyle: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF3D342B),
+            color: AppColors.neutral900,
           ),
         ),
         cardTheme: CardThemeData(
           elevation: 0,
-          shadowColor: const Color(0xFF2D5A46).withOpacity(0.1),
+          shadowColor: AppColors.primary.withOpacity(0.1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2D5A46),
+            backgroundColor: AppColors.primary,
             foregroundColor: const Color(0xFFFFFFFF),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
@@ -78,8 +120,8 @@ class AIGoalCoachApp extends StatelessWidget {
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF2D5A46),
-            side: const BorderSide(color: Color(0xFF2D5A46)),
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.primary),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -88,18 +130,18 @@ class AIGoalCoachApp extends StatelessWidget {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFFFFFFFF),
+          fillColor: AppColors.inputBackground,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE6E2D8)),
+            borderSide: const BorderSide(color: AppColors.neutral200),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE6E2D8)),
+            borderSide: const BorderSide(color: AppColors.neutral200),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF2D5A46), width: 2),
+            borderSide: const BorderSide(color: AppColors.primary, width: 2),
           ),
           contentPadding: const EdgeInsets.all(16),
         ),
@@ -171,7 +213,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2D5A46), Color(0xFF1F3D30)],
+            colors: [AppColors.primary, AppColors.primaryDark],
           ),
         ),
         child: Center(
@@ -281,7 +323,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2D5A46), Color(0xFF1F3D30)],
+            colors: [AppColors.primary, AppColors.primaryDark],
           ),
         ),
         child: SafeArea(
@@ -395,7 +437,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE07A5F),
+                          backgroundColor: AppColors.tertiary,
                           foregroundColor: const Color(0xFFFFFFFF),
                           elevation: 8,
                           shadowColor: Colors.black.withOpacity(0.2),
@@ -450,17 +492,17 @@ class _HomeScreenState extends State<HomeScreen> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: Color(0xFF2D5A46)),
+            selectedIcon: Icon(Icons.home, color: AppColors.primary),
             label: '首页',
           ),
           NavigationDestination(
             icon: Icon(Icons.check_circle_outline),
-            selectedIcon: Icon(Icons.check_circle, color: Color(0xFF2D5A46)),
+            selectedIcon: Icon(Icons.check_circle, color: AppColors.primary),
             label: '打卡',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Color(0xFF2D5A46)),
+            selectedIcon: Icon(Icons.person, color: AppColors.primary),
             label: '我的',
           ),
         ],
@@ -521,13 +563,13 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                color: const Color(0xFF2D5A46).withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(80),
               ),
               child: const Icon(
                 Icons.my_location_outlined,
                 size: 80,
-                color: Color(0xFF2D5A46),
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 32),
@@ -536,7 +578,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF333333),
+                color: AppColors.neutral900,
               ),
             ),
             const SizedBox(height: 12),
@@ -544,7 +586,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               '创建一个目标开始吧',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[500],
+                color: AppColors.neutral500,
               ),
             ),
             const SizedBox(height: 40),
@@ -586,7 +628,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
+              color: AppColors.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -599,7 +641,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
           ),
           const SizedBox(height: 24),
           Card(
-            color: const Color(0xFFF1F5F9),
+            color: AppColors.cardBackground,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -614,7 +656,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
+                          color: AppColors.neutral800,
                         ),
                       ),
                     ],
@@ -634,8 +676,8 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       icon: const Icon(Icons.add),
                       label: const Text('创建新目标'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF2D5A46),
-                        side: const BorderSide(color: Color(0xFF2D5A46)),
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
                       ),
                     ),
                   ),
@@ -652,8 +694,8 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       icon: const Icon(Icons.people_outline),
                       label: const Text('查看学习伙伴'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF2D5A46),
-                        side: const BorderSide(color: Color(0xFFE0E0E0)),
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.neutral200),
                       ),
                     ),
                   ),
@@ -693,10 +735,10 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2D5A46).withOpacity(0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: const Color(0xFF2D5A46), size: 24),
+                    child: Icon(icon, color: AppColors.primary, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -705,14 +747,14 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
+                        color: AppColors.neutral900,
                       ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2D5A46),
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -727,8 +769,8 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2D5A46)),
+                  backgroundColor: AppColors.neutral200,
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                   minHeight: 8,
                 ),
               ),
@@ -738,14 +780,14 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                 children: [
                   Text(
                     days,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 13, color: AppColors.neutral600),
                   ),
                   Text(
                     '${(progress * 100).toInt()}%',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D5A46),
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -754,16 +796,16 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.today, size: 18, color: Colors.grey[600]),
+                    Icon(Icons.today, size: 18, color: AppColors.neutral600),
                     const SizedBox(width: 8),
                     Text(
                       '今天：$todayTask',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      style: TextStyle(fontSize: 14, color: AppColors.neutral700),
                     ),
                   ],
                 ),
@@ -827,20 +869,20 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         children: [
           const Text(
             '你想达成什么目标？',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900),
           ),
           const SizedBox(height: 20),
           TextField(
             controller: _goalController,
             decoration: InputDecoration(
               hintText: '请输入你的目标...',
-              hintStyle: TextStyle(color: Colors.grey[400]),
+              hintStyle: TextStyle(color: AppColors.neutral400),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFF2D5A46), width: 2),
+                borderSide: const BorderSide(color: AppColors.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.all(16),
             ),
@@ -849,7 +891,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           const SizedBox(height: 32),
           Text(
             '或者选择一个模板：',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: AppColors.neutral600),
           ),
           const SizedBox(height: 16),
           ..._templates.map((template) => Padding(
@@ -861,9 +903,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AppColors.neutral200),
                 ),
                 child: Row(
                   children: [
@@ -871,10 +913,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                     const SizedBox(width: 16),
                     Text(
                       template['title']!,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.neutral700),
                     ),
                     const Spacer(),
-                    Icon(Icons.chevron_right, color: Colors.grey[400]),
+                    Icon(Icons.chevron_right, color: AppColors.neutral400),
                   ],
                 ),
               ),
@@ -902,7 +944,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         children: [
           const Text(
             '你的基础情况：',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900),
           ),
           const SizedBox(height: 24),
           _buildSectionTitle('每天可用时间：'),
@@ -918,9 +960,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 onSelected: (selected) {
                   if (selected) setState(() => _selectedTime = time);
                 },
-                selectedColor: const Color(0xFF2D5A46),
+                selectedColor: AppColors.primary,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? Colors.white : AppColors.neutral900,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               );
@@ -940,9 +982,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 onSelected: (selected) {
                   if (selected) setState(() => _selectedLevel = level);
                 },
-                selectedColor: const Color(0xFF2D5A46),
+                selectedColor: AppColors.primary,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? Colors.white : AppColors.neutral900,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               );
@@ -971,7 +1013,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+      style: TextStyle(fontSize: 14, color: AppColors.neutral600),
     );
   }
 }
@@ -986,17 +1028,17 @@ class GoalPreviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('创建目标'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2D5A46),
+        foregroundColor: AppColors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(Icons.auto_awesome, size: 64, color: Color(0xFF2D5A46)),
+            const Icon(Icons.auto_awesome, size: 64, color: AppColors.primary),
             const SizedBox(height: 24),
             const Text(
               'AI 为你生成了计划',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900),
             ),
             const SizedBox(height: 32),
             Card(
@@ -1012,13 +1054,13 @@ class GoalPreviewScreen extends StatelessWidget {
                         const Expanded(
                           child: Text(
                             '30 天读 5 本书',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral900),
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: AppColors.success,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
@@ -1033,8 +1075,8 @@ class GoalPreviewScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       child: const LinearProgressIndicator(
                         value: 0,
-                        backgroundColor: Color(0xFFE0E0E0),
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2D5A46)),
+                        backgroundColor: AppColors.neutral200,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                         minHeight: 8,
                       ),
                     ),
@@ -1057,7 +1099,7 @@ class GoalPreviewScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('第 1 周：基础入门', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[800])),
+                    Text('第 1 周：基础入门', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral800)),
                     const SizedBox(height: 12),
                     _buildTaskItem('Day 1: 读第 1-20 页', '预计 40 分钟'),
                     _buildTaskItem('Day 2: 读第 21-40 页', '预计 40 分钟'),
@@ -1074,7 +1116,7 @@ class GoalPreviewScreen extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.all(16),
-                      side: const BorderSide(color: Color(0xFFE0E0E0)),
+                      side: const BorderSide(color: AppColors.neutral200),
                     ),
                     child: const Text('调整计划'),
                   ),
@@ -1105,10 +1147,10 @@ class GoalPreviewScreen extends StatelessWidget {
   Widget _buildInfoItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: 20, color: AppColors.neutral600),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.neutral900)),
+        Text(label, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
       ],
     );
   }
@@ -1122,7 +1164,7 @@ class GoalPreviewScreen extends StatelessWidget {
             width: 20,
             height: 20,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[400]!),
+              border: Border.all(color: AppColors.neutral400),
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -1131,8 +1173,8 @@ class GoalPreviewScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text(meta, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w500, color: AppColors.neutral900)),
+                Text(meta, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
               ],
             ),
           ),
@@ -1152,7 +1194,7 @@ class CheckinScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('快速打卡'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2D5A46),
+        foregroundColor: AppColors.primary,
       ),
       body: Center(
         child: Padding(
@@ -1164,24 +1206,24 @@ class CheckinScreen extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2D5A46).withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: const Icon(
                   Icons.check_circle_outline,
                   size: 60,
-                  color: Color(0xFF2D5A46),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 32),
               const Text(
                 '今日任务已完成！',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900),
               ),
               const SizedBox(height: 16),
               Text(
                 '连续打卡 7 天，继续保持！',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 16, color: AppColors.neutral600),
               ),
             ],
           ),
@@ -1201,7 +1243,7 @@ class GoalDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('30 天读 5 本书'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2D5A46),
+        foregroundColor: AppColors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1216,11 +1258,11 @@ class GoalDetailScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('第 18 天 / 共 30 天', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                        const Text('第 18 天 / 共 30 天', style: TextStyle(fontSize: 14, color: AppColors.neutral500)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2D5A46),
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text('60%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -1232,8 +1274,8 @@ class GoalDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       child: const LinearProgressIndicator(
                         value: 0.6,
-                        backgroundColor: Color(0xFFE0E0E0),
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2D5A46)),
+                        backgroundColor: AppColors.neutral200,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                         minHeight: 8,
                       ),
                     ),
@@ -1242,10 +1284,10 @@ class GoalDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('今日任务', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+            Text('今日任务', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
             const SizedBox(height: 12),
             Card(
-              color: const Color(0xFFF1F5F9),
+              color: AppColors.cardBackground,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -1256,19 +1298,19 @@ class GoalDetailScreen extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2D5A46).withOpacity(0.2),
+                            color: AppColors.primary.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.menu_book, color: const Color(0xFF2D5A46)),
+                          child: const Icon(Icons.menu_book, color: AppColors.primary),
                         ),
                         const SizedBox(width: 16),
                         const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('读第 81-100 页', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text('读第 81-100 页', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
                               SizedBox(height: 4),
-                              Text('预计耗时：40 分钟', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                              Text('预计耗时：40 分钟', style: TextStyle(fontSize: 13, color: AppColors.neutral500)),
                             ],
                           ),
                         ),
@@ -1283,7 +1325,7 @@ class GoalDetailScreen extends StatelessWidget {
                         icon: const Icon(Icons.check_circle_outline),
                         label: const Text('打卡完成'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2D5A46),
+                          backgroundColor: AppColors.primary,
                         ),
                       ),
                     ),
@@ -1292,7 +1334,7 @@ class GoalDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('任务列表', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+            Text('任务列表', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
             const SizedBox(height: 12),
             _buildTaskItem(true, 'Day 1: 读第 1-20 页', '已完成'),
             _buildTaskItem(true, 'Day 2: 读第 21-40 页', '已完成'),
@@ -1313,7 +1355,7 @@ class GoalDetailScreen extends StatelessWidget {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: completed ? Colors.green : (isToday ? const Color(0xFF2D5A46) : Colors.grey[300]),
+            color: completed ? AppColors.success : (isToday ? AppColors.primary : AppColors.neutral300),
             shape: BoxShape.circle,
           ),
           child: completed
@@ -1324,10 +1366,10 @@ class GoalDetailScreen extends StatelessWidget {
           title,
           style: TextStyle(
             decoration: completed ? TextDecoration.lineThrough : null,
-            color: completed ? Colors.grey : null,
+            color: completed ? AppColors.neutral400 : AppColors.neutral900,
           ),
         ),
-        subtitle: Text(meta, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+        subtitle: Text(meta, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
       ),
     );
   }
@@ -1342,9 +1384,9 @@ class GoalDetailScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('完成打卡！🎉', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const Text('完成打卡！🎉', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
               const SizedBox(height: 8),
-              Text('今天你读了第 81-100 页', style: TextStyle(color: Colors.grey[600])),
+              Text('今天你读了第 81-100 页', style: TextStyle(color: AppColors.neutral600)),
               const SizedBox(height: 20),
               TextField(
                 maxLines: 3,
@@ -1358,7 +1400,7 @@ class GoalDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1369,10 +1411,10 @@ class GoalDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('AI 点评：', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          const Text('AI 点评：', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.neutral900)),
                           Text(
                             '太棒了！你已经连续打卡 7 天了，保持这个节奏，预计可以提前 2 天完成！',
-                            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                            style: TextStyle(fontSize: 13, color: AppColors.neutral700),
                           ),
                         ],
                       ),
@@ -1417,12 +1459,12 @@ class CommunityScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('学习伙伴'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2D5A46),
+        foregroundColor: AppColors.primary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('和你一起打卡的人 (23)', style: TextStyle(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w600)),
+          Text('和你一起打卡的人 (23)', style: TextStyle(fontSize: 14, color: AppColors.neutral600, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
           _buildUserItem('👤', '张三', '30 天读 5 本书', 15),
           _buildUserItem('👤', '李四', '30 天读 5 本书', 12),
@@ -1438,7 +1480,7 @@ class CommunityScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.emoji_events, color: Colors.amber[700]),
                       const SizedBox(width: 8),
-                      Text('组队 PK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[800])),
+                      Text('组队 PK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral800)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -1447,7 +1489,7 @@ class CommunityScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: AppColors.cardBackground,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -1458,13 +1500,13 @@ class CommunityScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('7 天打卡挑战赛', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text('7 天打卡挑战赛', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.neutral900)),
                                 SizedBox(height: 4),
-                                Text('已有 56 人参加', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                                Text('已有 56 人参加', style: TextStyle(fontSize: 13, color: AppColors.neutral500)),
                               ],
                             ),
                           ),
-                          Icon(Icons.chevron_right, color: Colors.grey[400]),
+                          Icon(Icons.chevron_right, color: AppColors.neutral400),
                         ],
                       ),
                     ),
@@ -1486,20 +1528,20 @@ class CommunityScreen extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: AppColors.neutral200,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Center(child: Text(avatar, style: const TextStyle(fontSize: 20))),
         ),
-        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('目标：$goal', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+        subtitle: Text('目标：$goal', style: TextStyle(fontSize: 12, color: AppColors.neutral600)),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFF2D5A46).withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D5A46))),
+          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
         ),
       ),
     );
@@ -1516,7 +1558,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('我的'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFF2D5A46),
+        foregroundColor: AppColors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1527,14 +1569,14 @@ class ProfileScreen extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFFE07A5F), Color(0xFFD4A373)]),
+                gradient: const LinearGradient(colors: [AppColors.tertiary, AppColors.warning]),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: const Icon(Icons.person, size: 50, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            const Text('用户名', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Text('已加入 7 天', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+            const Text('用户名', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+            Text('已加入 7 天', style: TextStyle(fontSize: 14, color: AppColors.neutral500)),
             const SizedBox(height: 24),
             Card(
               child: Padding(
@@ -1556,7 +1598,7 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('🏅 我的成就', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[800])),
+                    Text('🏅 我的成就', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral800)),
                     const SizedBox(height: 12),
                     _buildAchievementItem('🏅', '连续打卡 7 天', '2026-03-23 获得'),
                     _buildAchievementItem('🏅', '完成第一个目标', '2026-03-20 获得'),
@@ -1585,9 +1627,9 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2D5A46))),
+        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primary)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+        Text(label, style: TextStyle(fontSize: 13, color: AppColors.neutral600)),
       ],
     );
   }
@@ -1603,8 +1645,8 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(date, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+                Text(date, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
               ],
             ),
           ),
@@ -1615,8 +1657,8 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildSettingItem(IconData icon, String title, {bool showBadge = false}) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF2D5A46)),
-      title: Text(title),
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(title, style: const TextStyle(color: AppColors.neutral900)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1624,13 +1666,13 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF2D5A46),
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text('NEW', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
             ),
           if (showBadge) const SizedBox(width: 8),
-          Icon(Icons.chevron_right, color: Colors.grey[400]),
+          Icon(Icons.chevron_right, color: AppColors.neutral400),
         ],
       ),
       onTap: () {},
