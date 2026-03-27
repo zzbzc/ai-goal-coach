@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const AIGoalCoachApp());
@@ -14,10 +15,15 @@ class AIGoalCoachApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF6B35),
+          seedColor: const Color(0xFF2563EB),
           brightness: Brightness.light,
         ),
         useMaterial3: true,
+        // 字体配置 - 根据 DESIGN.md
+        textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
+          bodyLarge: GoogleFonts.dmSans(fontSize: 16),
+          bodyMedium: GoogleFonts.dmSans(fontSize: 14),
+        ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
@@ -26,14 +32,14 @@ class AIGoalCoachApp extends StatelessWidget {
           elevation: 2,
           shadowColor: Colors.black.withAlpha(26),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),
@@ -69,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
     _controller.forward();
@@ -104,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFFF6B35), Color(0xFFFF8C61)],
+            colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
           ),
         ),
         child: Center(
@@ -120,7 +126,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     height: 120,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.my_location_outlined,
@@ -214,7 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFFF6B35), Color(0xFFFF8C61)],
+            colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
           ),
         ),
         child: SafeArea(
@@ -238,7 +244,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             height: 160,
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(40),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
                               _pages[index]['icon'] as IconData,
@@ -261,7 +267,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               _pages[index]['items']!,
@@ -329,7 +335,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFFFF6B35),
+                          foregroundColor: const Color(0xFF2563EB),
                           elevation: 8,
                           shadowColor: Colors.black.withOpacity(0.2),
                         ),
@@ -383,17 +389,17 @@ class _HomeScreenState extends State<HomeScreen> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: Color(0xFFFF6B35)),
+            selectedIcon: Icon(Icons.home, color: Color(0xFF2563EB)),
             label: '首页',
           ),
           NavigationDestination(
             icon: Icon(Icons.check_circle_outline),
-            selectedIcon: Icon(Icons.check_circle, color: Color(0xFFFF6B35)),
+            selectedIcon: Icon(Icons.check_circle, color: Color(0xFF2563EB)),
             label: '打卡',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Color(0xFFFF6B35)),
+            selectedIcon: Icon(Icons.person, color: Color(0xFF2563EB)),
             label: '我的',
           ),
         ],
@@ -422,7 +428,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
@@ -454,13 +460,13 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                color: const Color(0xFFFF6B35).withOpacity(0.1),
+                color: const Color(0xFF2563EB).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(80),
               ),
               child: const Icon(
                 Icons.my_location_outlined,
                 size: 80,
-                color: Color(0xFFFF6B35),
+                color: Color(0xFF2563EB),
               ),
             ),
             const SizedBox(height: 32),
@@ -532,7 +538,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
           ),
           const SizedBox(height: 24),
           Card(
-            color: const Color(0xFFFFF8F5),
+            color: const Color(0xFFF1F5F9),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -567,8 +573,8 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       icon: const Icon(Icons.add),
                       label: const Text('创建新目标'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFFF6B35),
-                        side: const BorderSide(color: Color(0xFFFF6B35)),
+                        foregroundColor: const Color(0xFF2563EB),
+                        side: const BorderSide(color: Color(0xFF2563EB)),
                       ),
                     ),
                   ),
@@ -585,7 +591,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       icon: const Icon(Icons.people_outline),
                       label: const Text('查看学习伙伴'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFFF6B35),
+                        foregroundColor: const Color(0xFF2563EB),
                         side: const BorderSide(color: Color(0xFFE0E0E0)),
                       ),
                     ),
@@ -626,10 +632,10 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B35).withOpacity(0.1),
+                      color: const Color(0xFF2563EB).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: const Color(0xFFFF6B35), size: 24),
+                    child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -645,7 +651,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B35),
+                      color: const Color(0xFF2563EB),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -661,7 +667,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                 child: LinearProgressIndicator(
                   value: progress,
                   backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF6B35)),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
                   minHeight: 8,
                 ),
               ),
@@ -678,7 +684,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFFF6B35),
+                      color: Color(0xFF2563EB),
                     ),
                   ),
                 ],
@@ -687,7 +693,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8F5),
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -742,7 +748,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       appBar: AppBar(
         title: Text('创建目标'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -769,11 +775,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               hintText: '请输入你的目标...',
               hintStyle: TextStyle(color: Colors.grey[400]),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
               ),
               contentPadding: const EdgeInsets.all(16),
             ),
@@ -794,9 +800,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8F5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFFE0D0)),
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Row(
                   children: [
@@ -851,7 +857,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 onSelected: (selected) {
                   if (selected) setState(() => _selectedTime = time);
                 },
-                selectedColor: const Color(0xFFFF6B35),
+                selectedColor: const Color(0xFF2563EB),
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.white : Colors.black87,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -873,7 +879,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 onSelected: (selected) {
                   if (selected) setState(() => _selectedLevel = level);
                 },
-                selectedColor: const Color(0xFFFF6B35),
+                selectedColor: const Color(0xFF2563EB),
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.white : Colors.black87,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -919,13 +925,13 @@ class GoalPreviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('创建目标'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            const Icon(Icons.auto_awesome, size: 64, color: Color(0xFFFF6B35)),
+            const Icon(Icons.auto_awesome, size: 64, color: Color(0xFF2563EB)),
             const SizedBox(height: 24),
             const Text(
               'AI 为你生成了计划',
@@ -967,7 +973,7 @@ class GoalPreviewScreen extends StatelessWidget {
                       child: const LinearProgressIndicator(
                         value: 0,
                         backgroundColor: Color(0xFFE0E0E0),
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B35)),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
                         minHeight: 8,
                       ),
                     ),
@@ -1085,7 +1091,7 @@ class CheckinScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('快速打卡'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
       ),
       body: Center(
         child: Padding(
@@ -1097,13 +1103,13 @@ class CheckinScreen extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B35).withOpacity(0.1),
+                  color: const Color(0xFF2563EB).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: const Icon(
                   Icons.check_circle_outline,
                   size: 60,
-                  color: Color(0xFFFF6B35),
+                  color: Color(0xFF2563EB),
                 ),
               ),
               const SizedBox(height: 32),
@@ -1134,7 +1140,7 @@ class GoalDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('30 天读 5 本书'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1153,7 +1159,7 @@ class GoalDetailScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFF6B35),
+                            color: const Color(0xFF2563EB),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text('60%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -1166,7 +1172,7 @@ class GoalDetailScreen extends StatelessWidget {
                       child: const LinearProgressIndicator(
                         value: 0.6,
                         backgroundColor: Color(0xFFE0E0E0),
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B35)),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
                         minHeight: 8,
                       ),
                     ),
@@ -1178,7 +1184,7 @@ class GoalDetailScreen extends StatelessWidget {
             Text('今日任务', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[700])),
             const SizedBox(height: 12),
             Card(
-              color: const Color(0xFFFFF8F5),
+              color: const Color(0xFFF1F5F9),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -1189,10 +1195,10 @@ class GoalDetailScreen extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFF6B35).withOpacity(0.2),
+                            color: const Color(0xFF2563EB).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.menu_book, color: Color(0xFFFF6B35)),
+                          child: const Icon(Icons.menu_book, color: const Color(0xFF2563EB)),
                         ),
                         const SizedBox(width: 16),
                         const Expanded(
@@ -1215,6 +1221,9 @@ class GoalDetailScreen extends StatelessWidget {
                         onPressed: () => _showCheckinDialog(context),
                         icon: const Icon(Icons.check_circle_outline),
                         label: const Text('打卡完成'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                        ),
                       ),
                     ),
                   ],
@@ -1243,7 +1252,7 @@ class GoalDetailScreen extends StatelessWidget {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: completed ? Colors.green : (isToday ? const Color(0xFFFF6B35) : Colors.grey[300]),
+            color: completed ? Colors.green : (isToday ? const Color(0xFF2563EB) : Colors.grey[300]),
             shape: BoxShape.circle,
           ),
           child: completed
@@ -1288,7 +1297,7 @@ class GoalDetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8F5),
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1347,7 +1356,7 @@ class CommunityScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('学习伙伴'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -1377,7 +1386,7 @@ class CommunityScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF8F5),
+                        color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -1426,10 +1435,10 @@ class CommunityScreen extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFFF6B35).withOpacity(0.1),
+            color: const Color(0xFF2563EB).withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFF6B35))),
+          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
         ),
       ),
     );
@@ -1446,7 +1455,7 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('我的'),
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFFF6B35),
+        foregroundColor: const Color(0xFF2563EB),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1457,7 +1466,7 @@ class ProfileScreen extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFFFF6B35), Color(0xFFFF8C61)]),
+                gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)]),
                 borderRadius: BorderRadius.circular(50),
               ),
               child: const Icon(Icons.person, size: 50, color: Colors.white),
@@ -1515,7 +1524,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFF6B35))),
+        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
         const SizedBox(height: 4),
         Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
       ],
@@ -1545,7 +1554,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildSettingItem(IconData icon, String title, {bool showBadge = false}) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFFFF6B35)),
+      leading: Icon(icon, color: const Color(0xFF2563EB)),
       title: Text(title),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1554,7 +1563,7 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFFFF6B35),
+                color: const Color(0xFF2563EB),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text('NEW', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
