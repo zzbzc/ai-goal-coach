@@ -935,9 +935,30 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                             ),
                           ),
+                          // 底部填充 - 避免内容贴底
+                          SizedBox(height: isLargeScreen ? 60 : 40),
                         ],
                       ),
                     ),
+                  ),
+                ),
+              ),
+            ),
+            // 底部光效填充
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 100,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      const Color(0xFF0D1F18).withOpacity(0.5),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
               ),
@@ -2236,7 +2257,22 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   Future<void> _createGoal() async {
     setState(() => _isCreating = true);
     try {
-      // 计算日期：从今天开始，根据选择的持续时间计算结束日期
+      // 1. 先调用 AI 生成计划
+      Map<String, dynamic>? aiPlan;
+      try {
+        aiPlan = await _goalService.generateAIPlan(
+          title: _goalController.text,
+          description: null,
+          durationDays: _selectedDurationDays,
+          dailyTimeAvailable: _selectedTime,
+          experienceLevel: _selectedLevel,
+        );
+      } catch (e) {
+        // AI 生成失败，继续创建目标但不显示计划
+        debugPrint('AI 计划生成失败：$e');
+      }
+
+      // 2. 创建目标
       final startDate = DateTime.now();
       final endDate = startDate.add(Duration(days: _selectedDurationDays));
 
@@ -2252,12 +2288,17 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
       if (mounted) {
         setState(() => _isCreating = false);
-        // 创建成功，返回首页
         Navigator.pop(context, true);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('目标创建成功！')),
-          );
+
+        // 3. 展示 AI 生成的计划（如果有）
+        if (aiPlan != null && aiPlan.containsKey('daily_tasks')) {
+          _showAIPlanDialog(aiPlan);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('目标创建成功！AI 正在为你生成计划...')),
+            );
+          }
         }
       }
     } catch (e) {
@@ -2268,6 +2309,255 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         );
       }
     }
+  }
+
+  // 展示 AI 计划对话框
+  void _showAIPlanDialog(Map<String, dynamic> plan) {
+    final dailyTasks = plan['daily_tasks'] as List<dynamic>? ?? [];
+    final weeklyPlans = plan['weekly_plans'] as List<dynamic>? ?? [];
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 500, maxWidth: 400),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.primaryContainer, AppColors.secondaryContainer],
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 头部
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI 计划已生成',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Text(
+                            '已为你定制专属学习计划',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.neutral600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 内容区
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 周计划概览
+                      if (weeklyPlans.isNotEmpty) ...[
+                        const Text(
+                          '阶段目标',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.neutral800,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...weeklyPlans.take(3).map((week) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  '第${week['week_number']}周：${week['title']}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.neutral700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                        const SizedBox(height: 16),
+                      ],
+                      // 前 3 天的任务
+                      if (dailyTasks.isNotEmpty) ...[
+                        const Text(
+                          '前 3 天任务',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.neutral800,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...dailyTasks.take(3).map((task, index) => Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${index + 1}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      task['title'],
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.neutral800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (task.containsKey('description')) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  task['description'],
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.neutral500,
+                                  ),
+                                ),
+                              ],
+                              if (task.containsKey('estimated_minutes')) ...[
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryContainer,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '预计 ${task['estimated_minutes']} 分钟',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        )),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              // 底部按钮
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '开始执行计划',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        Icon(Icons.arrow_forward, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   String _getFriendlyErrorMessage(String error) {

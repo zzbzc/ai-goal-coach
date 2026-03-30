@@ -58,4 +58,22 @@ class GoalService {
   Future<List<dynamic>> getGoalTasks(String goalId) async {
     return await _http.get('${AppConfig.goalsUrl}/$goalId/tasks');
   }
+
+  /// AI 生成目标计划
+  Future<Map<String, dynamic>> generateAIPlan({
+    required String title,
+    String? description,
+    required int durationDays,
+    required String dailyTimeAvailable,
+    required String experienceLevel,
+  }) async {
+    final data = await _http.post('${AppConfig.apiPrefix}/goals/plan/generate', {
+      'title': title,
+      'description': description,
+      'duration_days': durationDays,
+      'daily_time_available': dailyTimeAvailable,
+      'experience_level': experienceLevel,
+    });
+    return data['plan'] ?? {};
+  }
 }
