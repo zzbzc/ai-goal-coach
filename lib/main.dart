@@ -2267,10 +2267,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           dailyTimeAvailable: _selectedTime,
           experienceLevel: _selectedLevel,
         );
-        debugPrint('AI 计划生成成功：$aiPlan');
+        debugPrint('AI 计划生成成功：${aiPlan?.keys}');
       } catch (e) {
         // AI 生成失败，继续创建目标但不显示计划
         debugPrint('AI 计划生成失败：$e');
+        aiPlan = null;
       }
 
       // 2. 创建目标
@@ -2297,9 +2298,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              aiPlan == null
-                  ? const SnackBar(content: Text('目标创建成功！AI 计划生成失败，已为您创建目标'))
-                  : const SnackBar(content: Text('目标创建成功！')),
+              const SnackBar(content: Text('目标创建成功！')),
             );
           }
         }
