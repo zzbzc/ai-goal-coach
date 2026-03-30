@@ -41,7 +41,7 @@ class HttpService {
   }
 
   /// 刷新 Token
-  Future<bool> _refreshToken() async {
+  Future<bool> _refreshAccessToken() async {
     if (_refreshToken == null || _isRefreshing) return false;
     _isRefreshing = true;
     try {
@@ -123,7 +123,7 @@ class HttpService {
       return jsonDecode(response.body);
     } else if (response.statusCode == 401) {
       // Token 过期，尝试刷新
-      final refreshed = await _refreshToken();
+      final refreshed = await _refreshAccessToken();
       if (refreshed) {
         // 重试原请求
         switch (method) {

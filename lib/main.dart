@@ -1109,12 +1109,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               {'label': '60 天', 'days': 60},
               {'label': '90 天', 'days': 90},
             ].map((option) {
-              final isSelected = _selectedDurationDays == option['days'];
+              final days = option['days'] as int;
+              final label = option['label'] as String;
+              final isSelected = _selectedDurationDays == days;
               return ChoiceChip(
-                label: Text(option['label']!),
+                label: Text(label),
                 selected: isSelected,
                 onSelected: (selected) {
-                  if (selected) setState(() => _selectedDurationDays = option['days']!);
+                  if (selected) setState(() => _selectedDurationDays = days);
                 },
                 selectedColor: AppColors.primary,
                 labelStyle: TextStyle(
