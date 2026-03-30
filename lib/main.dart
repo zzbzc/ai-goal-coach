@@ -1181,7 +1181,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       if (mounted) {
         setState(() => _isCreating = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: _getFriendlyErrorMessage(e.toString())),
+          SnackBar(content: Text(_getFriendlyErrorMessage(e.toString()))),
         );
       }
     }
