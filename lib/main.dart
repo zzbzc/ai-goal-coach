@@ -2987,7 +2987,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '第${_goal?['current_day'] ?? 0}天 / 共${_goal?['total_days'] ?? 0}天',
+                          '第${_goal?['current_day'] ?? 0}天 / 共${_goal?['duration_days'] ?? 0}天',
                           style: const TextStyle(fontSize: 14, color: AppColors.neutral500),
                         ),
                         Container(
@@ -2997,7 +2997,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '${(((_goal?['current_day'] ?? 0) / (_goal?['total_days'] ?? 1)) * 100).toInt()}%',
+                            '${(((_goal?['current_day'] ?? 0) / (_goal?['duration_days'] ?? 1)) * 100).toInt()}%',
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -3007,7 +3007,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                        value: ((_goal?['current_day'] ?? 0) / (_goal?['total_days'] ?? 1)).toDouble(),
+                        value: ((_goal?['current_day'] ?? 0) / (_goal?['duration_days'] ?? 1)).toDouble(),
                         backgroundColor: AppColors.neutral200,
                         valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                         minHeight: 8,

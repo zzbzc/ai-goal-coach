@@ -67,7 +67,7 @@ class GoalService {
     required String dailyTimeAvailable,
     required String experienceLevel,
   }) async {
-    final data = await _http.post('${AppConfig.apiPrefix}/goals/plan/generate', {
+    final data = await _http.post('${AppConfig.baseUrl}${AppConfig.apiPrefix}/goals/plan/generate', {
       'title': title,
       'description': description,
       'duration_days': durationDays,
