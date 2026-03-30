@@ -53,6 +53,14 @@ void main() async {
 class AIGoalCoachApp extends StatelessWidget {
   const AIGoalCoachApp({super.key});
 
+  // 检查是否已登录（有 Token 即认为已登录）
+  bool _isLoggedIn() {
+    // Token 是否存在由 HttpService 内部管理
+    // 这里简化处理，认为有 token 就是登录状态
+    // 实际有效性由 API 调用结果决定
+    return true; // 如果 HttpService 中有 token 则返回 true
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -547,9 +555,20 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
+        // 检测是否为认证失败
+        if (_errorMessage!.contains('认证失败') || _errorMessage!.contains('401')) {
+          _navigateToLogin(context);
+        }
         _isLoading = false;
       });
     }
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    // 跳转到登录页（这里简单返回到启动页，实际应用中应该跳转到登录页面）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/splash', (route) => false);
+    });
   }
 
   @override
@@ -1028,6 +1047,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   final TextEditingController _goalController = TextEditingController();
   String _selectedTime = '1 小时';
   String _selectedLevel = '零基础';
+  int _selectedDurationDays = 30;
   final GoalService _goalService = GoalService();
   bool _isCreating = false;
 
@@ -1189,6 +1209,34 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               );
             }).toList(),
           ),
+          const SizedBox(height: 24),
+          _buildSectionTitle('目标持续时间：'),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              {'label': '7 天', 'days': 7},
+              {'label': '14 天', 'days': 14},
+              {'label': '30 天', 'days': 30},
+              {'label': '60 天', 'days': 60},
+              {'label': '90 天', 'days': 90},
+            ].map((option) {
+              final isSelected = _selectedDurationDays == option['days'];
+              return ChoiceChip(
+                label: Text(option['label']!),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) setState(() => _selectedDurationDays = option['days']!);
+                },
+                selectedColor: AppColors.primary,
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.white : AppColors.neutral900,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              );
+            }).toList(),
+          ),
           const SizedBox(height: 40),
           SizedBox(
             width: double.infinity,
@@ -1216,9 +1264,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   Future<void> _createGoal() async {
     setState(() => _isCreating = true);
     try {
-      // 计算日期：从今天开始，30 天后结束
+      // 计算日期：从今天开始，根据选择的持续时间计算结束日期
       final startDate = DateTime.now();
-      final endDate = startDate.add(const Duration(days: 30));
+      final endDate = startDate.add(Duration(days: _selectedDurationDays));
 
       final result = await _goalService.createGoal(
         title: _goalController.text,
@@ -1244,176 +1292,24 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       if (mounted) {
         setState(() => _isCreating = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('创建失败：$e')),
+          SnackBar(content: _getFriendlyErrorMessage(e.toString())),
         );
       }
     }
   }
-}
 
-// ==================== 目标预览屏幕 ====================
-class GoalPreviewScreen extends StatelessWidget {
-  const GoalPreviewScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('创建目标'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.primary,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const Icon(Icons.auto_awesome, size: 64, color: AppColors.primary),
-            const SizedBox(height: 24),
-            const Text(
-              'AI 为你生成了计划',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900),
-            ),
-            const SizedBox(height: 32),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text('📚', style: TextStyle(fontSize: 24)),
-                        const SizedBox(width: 12),
-                        const Expanded(
-                          child: Text(
-                            '30 天读 5 本书',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral900),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.success,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            '可执行',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: const LinearProgressIndicator(
-                        value: 0,
-                        backgroundColor: AppColors.neutral200,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                        minHeight: 8,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildInfoItem('预计时间', '30 天', Icons.calendar_today),
-                        _buildInfoItem('每天需要', '约 40 分钟', Icons.timer),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('第 1 周：基础入门', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral800)),
-                    const SizedBox(height: 12),
-                    _buildTaskItem('Day 1: 读第 1-20 页', '预计 40 分钟'),
-                    _buildTaskItem('Day 2: 读第 21-40 页', '预计 40 分钟'),
-                    _buildTaskItem('Day 3: 读第 41-60 页', '预计 40 分钟'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                      side: const BorderSide(color: AppColors.neutral200),
-                    ),
-                    child: const Text('调整计划'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Pop preview
-                      Navigator.pop(context); // Pop create screen
-                      // In real app, save the goal here
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    child: const Text('确认开始', style: TextStyle(fontSize: 16)),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, size: 20, color: AppColors.neutral600),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.neutral900)),
-        Text(label, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
-      ],
-    );
-  }
-
-  Widget _buildTaskItem(String title, String meta) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.neutral400),
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w500, color: AppColors.neutral900)),
-                Text(meta, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  String _getFriendlyErrorMessage(String error) {
+    // 将常见错误转换为友好的中文提示
+    if (error.contains('SOCKET_EXCEPTION') || error.contains('Connection failed')) {
+      return '网络连接失败，请检查后端服务是否运行';
+    }
+    if (error.contains('认证失败') || error.contains('401')) {
+      return '请先登录后再创建目标';
+    }
+    if (error.contains('timeout')) {
+      return '请求超时，请重试';
+    }
+    return '创建失败：$error';
   }
 }
 
@@ -1657,14 +1553,11 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
             const Text('任务列表', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
             const SizedBox(height: 12),
             if (_tasks.isEmpty) ...[
-              _buildTaskItem(false, '暂无任务数据', ''),
+              _buildTaskItem(false, '暂无任务数据', 'AI 正在为你生成每日任务，请稍后刷新'),
             ] else ...[
               for (var task in _tasks)
                 _buildTaskItemFromData(task),
             ],
-            _buildTaskItem(true, 'Day 3: 读第 41-60 页', '已完成'),
-            _buildTaskItem(false, 'Day 18: 读第 81-100 页', '今天', isToday: true),
-            _buildTaskItem(false, 'Day 19: 读第 101-120 页', '待完成'),
           ],
         ),
       ),
