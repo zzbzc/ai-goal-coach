@@ -43,7 +43,10 @@ class AppColors {
   static const inputBackground = Color(0xFFFFFFFF);
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // 初始化 HTTP 服务（加载存储的 Token）
+  await HttpService().loadTokens();
   runApp(const AIGoalCoachApp());
 }
 
@@ -521,6 +524,33 @@ class GoalsListScreen extends StatefulWidget {
 
 class _GoalsListScreenState extends State<GoalsListScreen> {
   bool _hasGoals = false;
+  bool _isLoading = true;
+  List<dynamic> _goals = [];
+  String? _errorMessage;
+  final GoalService _goalService = GoalService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGoals();
+  }
+
+  Future<void> _loadGoals() async {
+    setState(() => _isLoading = true);
+    try {
+      final goals = await _goalService.getGoals();
+      setState(() {
+        _goals = goals;
+        _hasGoals = goals.isNotEmpty;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -548,7 +578,70 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
           ),
         ],
       ),
-      body: _hasGoals ? _buildGoalsList() : _buildEmptyState(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? _buildErrorState()
+              : _hasGoals
+                  ? _buildGoalsList()
+                  : _buildEmptyState(),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(80),
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                size: 80,
+                color: AppColors.error,
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              '加载失败',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.neutral900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _errorMessage ?? '未知错误',
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.neutral500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: 220,
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: _loadGoals,
+                icon: const Icon(Icons.refresh),
+                label: const Text(
+                  '重试',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -624,7 +717,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '进行中目标 (1)',
+            '进行中目标 (${_goals.length})',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -632,13 +725,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildGoalCard(
-            icon: Icons.menu_book_rounded,
-            title: '30 天读 5 本书',
-            progress: 0.6,
-            days: '第 18 天 / 共 30 天',
-            todayTask: '读第 81-100 页',
-          ),
+          ..._goals.map((goal) => _buildGoalCardFromData(goal)),
           const SizedBox(height: 24),
           Card(
             color: AppColors.cardBackground,
@@ -816,6 +903,116 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
       ),
     );
   }
+
+  /// 从后端数据构建目标卡片
+  Widget _buildGoalCardFromData(dynamic goal) {
+    final int totalDays = (goal['total_days'] ?? 30);
+    final int currentDay = (goal['current_day'] ?? 0);
+    final double progress = totalDays > 0 ? currentDay / totalDays : 0.0;
+
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GoalDetailScreen(goalId: goal['id']),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      goal['title'] ?? '未命名目标',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.neutral900,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      '去打卡',
+                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: AppColors.neutral200,
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  minHeight: 8,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '第$currentDay 天 / 共$totalDays 天',
+                    style: TextStyle(fontSize: 13, color: AppColors.neutral600),
+                  ),
+                  Text(
+                    '${(progress * 100).toInt()}%',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.today, size: 18, color: AppColors.neutral600),
+                    const SizedBox(width: 8),
+                    Text(
+                      '今天：${goal['today_task'] ?? '暂无任务'}',
+                      style: const TextStyle(fontSize: 14, color: AppColors.neutral700),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ==================== 创建目标屏幕 ====================
@@ -831,6 +1028,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   final TextEditingController _goalController = TextEditingController();
   String _selectedTime = '1 小时';
   String _selectedLevel = '零基础';
+  final GoalService _goalService = GoalService();
+  bool _isCreating = false;
 
   final List<Map<String, String>> _templates = [
     {'icon': '📚', 'title': '30 天读 5 本书', 'goal': '30 天读 5 本书'},
@@ -995,14 +1194,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GoalPreviewScreen()),
-                );
-              },
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('生成计划', style: TextStyle(fontSize: 18)),
+              onPressed: _isCreating ? null : _createGoal,
+              icon: _isCreating
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.auto_awesome),
+              label: Text(_isCreating ? '创建中...' : '生成计划', style: const TextStyle(fontSize: 18)),
             ),
           ),
         ],
@@ -1015,6 +1211,43 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       title,
       style: TextStyle(fontSize: 14, color: AppColors.neutral600),
     );
+  }
+
+  Future<void> _createGoal() async {
+    setState(() => _isCreating = true);
+    try {
+      // 计算日期：从今天开始，30 天后结束
+      final startDate = DateTime.now();
+      final endDate = startDate.add(const Duration(days: 30));
+
+      final result = await _goalService.createGoal(
+        title: _goalController.text,
+        description: '通过 AI 辅助达成目标',
+        icon: '🎯',
+        startDate: startDate,
+        endDate: endDate,
+        dailyTimeAvailable: _selectedTime,
+        experienceLevel: _selectedLevel,
+      );
+
+      if (mounted) {
+        setState(() => _isCreating = false);
+        // 创建成功，返回首页
+        Navigator.pop(context, true);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('目标创建成功！')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isCreating = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('创建失败：$e')),
+        );
+      }
+    }
   }
 }
 
@@ -1234,14 +1467,89 @@ class CheckinScreen extends StatelessWidget {
 }
 
 // ==================== 目标详情屏幕 ====================
-class GoalDetailScreen extends StatelessWidget {
-  const GoalDetailScreen({super.key});
+class GoalDetailScreen extends StatefulWidget {
+  final String goalId;
+  const GoalDetailScreen({super.key, required this.goalId});
+
+  @override
+  State<GoalDetailScreen> createState() => _GoalDetailScreenState();
+}
+
+class _GoalDetailScreenState extends State<GoalDetailScreen> {
+  final GoalService _goalService = GoalService();
+  final CheckinService _checkinService = CheckinService();
+  Map<String, dynamic>? _goal;
+  List<dynamic> _tasks = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGoalData();
+  }
+
+  Future<void> _loadGoalData() async {
+    setState(() => _isLoading = true);
+    try {
+      final goal = await _goalService.getGoal(widget.goalId);
+      final tasks = await _goalService.getGoalTasks(widget.goalId);
+      setState(() {
+        _goal = goal;
+        _tasks = tasks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('目标详情'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('目标详情'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 80, color: AppColors.error),
+                const SizedBox(height: 32),
+                const Text('加载失败', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+                const SizedBox(height: 12),
+                Text(_errorMessage ?? '未知错误', style: TextStyle(fontSize: 16, color: AppColors.neutral500)),
+                const SizedBox(height: 40),
+                ElevatedButton(onPressed: _loadGoalData, child: const Text('重试')),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('30 天读 5 本书'),
+        title: Text(_goal?['title'] ?? '目标详情'),
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.primary,
       ),
@@ -1258,24 +1566,30 @@ class GoalDetailScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('第 18 天 / 共 30 天', style: TextStyle(fontSize: 14, color: AppColors.neutral500)),
+                        Text(
+                          '第${_goal?['current_day'] ?? 0}天 / 共${_goal?['total_days'] ?? 0}天',
+                          style: const TextStyle(fontSize: 14, color: AppColors.neutral500),
+                        ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: AppColors.primary,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text('60%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            '${(((_goal?['current_day'] ?? 0) / (_goal?['total_days'] ?? 1)) * 100).toInt()}%',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
-                      child: const LinearProgressIndicator(
-                        value: 0.6,
+                      child: LinearProgressIndicator(
+                        value: ((_goal?['current_day'] ?? 0) / (_goal?['total_days'] ?? 1)).toDouble(),
                         backgroundColor: AppColors.neutral200,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                         minHeight: 8,
                       ),
                     ),
@@ -1284,7 +1598,7 @@ class GoalDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('今日任务', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
+            const Text('今日任务', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
             const SizedBox(height: 12),
             Card(
               color: AppColors.cardBackground,
@@ -1304,13 +1618,19 @@ class GoalDetailScreen extends StatelessWidget {
                           child: const Icon(Icons.menu_book, color: AppColors.primary),
                         ),
                         const SizedBox(width: 16),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('读第 81-100 页', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-                              SizedBox(height: 4),
-                              Text('预计耗时：40 分钟', style: TextStyle(fontSize: 13, color: AppColors.neutral500)),
+                              Text(
+                                _goal?['today_task'] ?? '暂无任务',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '预计耗时：${_goal?['estimated_time'] ?? '40 分钟'}',
+                                style: const TextStyle(fontSize: 13, color: AppColors.neutral500),
+                              ),
                             ],
                           ),
                         ),
@@ -1334,10 +1654,14 @@ class GoalDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('任务列表', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
+            const Text('任务列表', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
             const SizedBox(height: 12),
-            _buildTaskItem(true, 'Day 1: 读第 1-20 页', '已完成'),
-            _buildTaskItem(true, 'Day 2: 读第 21-40 页', '已完成'),
+            if (_tasks.isEmpty) ...[
+              _buildTaskItem(false, '暂无任务数据', ''),
+            ] else ...[
+              for (var task in _tasks)
+                _buildTaskItemFromData(task),
+            ],
             _buildTaskItem(true, 'Day 3: 读第 41-60 页', '已完成'),
             _buildTaskItem(false, 'Day 18: 读第 81-100 页', '今天', isToday: true),
             _buildTaskItem(false, 'Day 19: 读第 101-120 页', '待完成'),
@@ -1374,7 +1698,39 @@ class GoalDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildTaskItemFromData(dynamic task) {
+    final bool completed = task['status'] == 'completed';
+    final String title = task['title'] ?? '未命名任务';
+    final String meta = task['description'] ?? '';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: completed ? AppColors.success : AppColors.neutral300,
+            shape: BoxShape.circle,
+          ),
+          child: completed
+              ? const Icon(Icons.check, size: 16, color: Colors.white)
+              : null,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            decoration: completed ? TextDecoration.lineThrough : null,
+            color: completed ? AppColors.neutral400 : AppColors.neutral900,
+          ),
+        ),
+        subtitle: meta.isNotEmpty ? Text(meta, style: TextStyle(fontSize: 12, color: AppColors.neutral500)) : null,
+      ),
+    );
+  }
+
   void _showCheckinDialog(BuildContext context) {
+    final notesController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -1386,9 +1742,10 @@ class GoalDetailScreen extends StatelessWidget {
             children: [
               const Text('完成打卡！🎉', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
               const SizedBox(height: 8),
-              Text('今天你读了第 81-100 页', style: TextStyle(color: AppColors.neutral600)),
+              Text('今天：${_goal?['today_task'] ?? '暂无任务'}', style: TextStyle(color: AppColors.neutral600)),
               const SizedBox(height: 20),
               TextField(
+                controller: notesController,
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: '分享学习心得...（可选）',
@@ -1397,48 +1754,31 @@ class GoalDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Text('🤖', style: TextStyle(fontSize: 24)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('AI 点评：', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.neutral900)),
-                          Text(
-                            '太棒了！你已经连续打卡 7 天了，保持这个节奏，预计可以提前 2 天完成！',
-                            style: TextStyle(fontSize: 13, color: AppColors.neutral700),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () async {
+                    try {
+                      await _checkinService.createCheckin(
+                        goalId: widget.goalId,
+                        notes: notesController.text.isNotEmpty ? notesController.text : null,
+                      );
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('打卡成功！')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('打卡失败：$e')),
+                        );
+                      }
+                    }
+                  },
                   child: const Text('完成打卡'),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.share),
-                  label: const Text('分享海报'),
                 ),
               ),
             ],
