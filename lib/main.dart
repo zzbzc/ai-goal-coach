@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -170,29 +171,78 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  late AnimationController _gradientController;
+  late AnimationController _particleController;
+  late AnimationController _logoController;
+  late Animation<double> _logoFadeIn;
+  late Animation<double> _logoScale;
+  late Animation<double> _titleFadeIn;
+  late Animation<double> _titleSlideUp;
+  late Animation<double> _taglineFadeIn;
+  late Animation<double> _particleAnimation;
+  late Animation<Color?> _gradientAnimation;
+
+  // 粒子系统
+  final List<_Particle> _particles = [];
+  final Random _random = Random();
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    _initParticles();
+
+    // 渐变动画：从深夜到破晓
+    _gradientController = AnimationController(
+      duration: const Duration(milliseconds: 2500),
       vsync: this,
     );
+    _gradientAnimation = ColorTween(
+      begin: const Color(0xFF1A3A2E),
+      end: const Color(0xFF2D5A46),
+    ).animate(CurvedAnimation(
+      parent: _gradientController,
+      curve: Curves.easeInOut,
+    ));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    // Logo 动画
+    _logoController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _logoFadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: const Interval(0.0, 0.5, curve: Curves.easeOut)),
+    );
+    _logoScale = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: const Interval(0.0, 0.5, curve: Curves.elasticOut)),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    // 标题动画
+    _titleFadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: const Interval(0.3, 0.7, curve: Curves.easeOut)),
+    );
+    _titleSlideUp = Tween<double>(begin: 30.0, end: 0.0).animate(
+      CurvedAnimation(parent: _logoController, curve: const Interval(0.3, 0.7, curve: Curves.easeOutCubic)),
     );
 
-    _controller.forward();
+    // 标语动画
+    _taglineFadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: const Interval(0.6, 1.0, curve: Curves.easeOut)),
+    );
 
+    // 粒子动画
+    _particleController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _particleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _particleController, curve: Curves.easeInOut),
+    );
+
+    _logoController.forward();
+    _gradientController.forward();
+
+    // 3 秒后进入引导页
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -202,91 +252,296 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
             },
-            transitionDuration: const Duration(milliseconds: 500),
+            transitionDuration: const Duration(milliseconds: 600),
           ),
         );
       }
     });
   }
 
+  void _initParticles() {
+    for (int i = 0; i < 20; i++) {
+      _particles.add(_Particle(
+        x: _random.nextDouble(),
+        y: _random.nextDouble(),
+        size: _random.nextDouble() * 3 + 1,
+        speedX: (_random.nextDouble() - 0.5) * 0.02,
+        speedY: (_random.nextDouble() - 0.5) * 0.02,
+        opacity: _random.nextDouble() * 0.5 + 0.1,
+      ));
+    }
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
+    _gradientController.dispose();
+    _particleController.dispose();
+    _logoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, AppColors.primaryDark],
-          ),
-        ),
-        child: Center(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.my_location_outlined,
-                      size: 60,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'AI 目标教练',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'AI Goal Coach',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      '把"我想"变成"我做到"',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+      body: AnimatedBuilder(
+        animation: Listenable.merge([_gradientController, _logoController, _particleController]),
+        builder: (context, child) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.lerp(_gradientAnimation.value!, AppColors.primary, 0.3)!,
+                  Color.lerp(const Color(0xFF0D241C), AppColors.primaryDark, 0.5)!,
                 ],
               ),
             ),
-          ),
-        ),
+            child: Stack(
+              children: [
+                // 粒子层
+                CustomPaint(
+                  painter: _ParticlePainter(
+                    particles: _particles,
+                    animationValue: _particleAnimation.value,
+                  ),
+                  size: Size.infinite,
+                ),
+                // 装饰性光晕
+                Positioned(
+                  top: -100,
+                  right: -100,
+                  child: Transform.rotate(
+                    angle: _particleAnimation.value * 0.1,
+                    child: Container(
+                      width: 300,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            AppColors.secondary.withOpacity(0.15 * _particleAnimation.value),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: -80,
+                  left: -80,
+                  child: Transform.rotate(
+                    angle: -_particleAnimation.value * 0.15,
+                    child: Container(
+                      width: 250,
+                      height: 250,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            AppColors.tertiary.withOpacity(0.1 * _particleAnimation.value),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // 主内容
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Logo
+                      FadeTransition(
+                        opacity: _logoFadeIn,
+                        child: ScaleTransition(
+                          scale: _logoScale,
+                          child: Container(
+                            width: 140,
+                            height: 140,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withOpacity(0.25),
+                                  Colors.white.withOpacity(0.1),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.3),
+                                  blurRadius: 30,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.auto_graph_rounded,
+                              size: 70,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      // 标题
+                      Transform.translate(
+                        offset: Offset(0, _titleSlideUp.value),
+                        child: FadeTransition(
+                          opacity: _titleFadeIn,
+                          child: const Text(
+                            'AI 目标教练',
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 2,
+                              shadows: [
+                                Shadow(
+                                  color: Color(0x40000000),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // 副标题
+                      FadeTransition(
+                        opacity: _titleFadeIn,
+                        child: Text(
+                          'AI Goal Coach',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white.withOpacity(0.7),
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // 标语
+                      FadeTransition(
+                        opacity: _taglineFadeIn,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.tertiary.withOpacity(0.3),
+                                AppColors.secondary.withOpacity(0.2),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.25),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.rocket_launch_rounded,
+                                color: Colors.white.withOpacity(0.9),
+                                size: 18,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                '把"我想"变成"我做到"',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 底部光效
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: 120,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          AppColors.primary.withOpacity(0.4),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+// 粒子数据类
+class _Particle {
+  final double x;
+  final double y;
+  final double size;
+  final double speedX;
+  final double speedY;
+  final double opacity;
+
+  _Particle({
+    required this.x,
+    required this.y,
+    required this.size,
+    required this.speedX,
+    required this.speedY,
+    required this.opacity,
+  });
+}
+
+// 粒子绘制器
+class _ParticlePainter extends CustomPainter {
+  final List<_Particle> particles;
+  final double animationValue;
+
+  _ParticlePainter({required this.particles, required this.animationValue});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      final paint = Paint()
+        ..color = Colors.white.withOpacity(particle.opacity * (0.5 + animationValue * 0.5))
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, particle.size * 0.5);
+
+      final x = (particle.x + particle.speedX * animationValue * 20) * size.width;
+      final y = (particle.y + particle.speedY * animationValue * 20) * size.height;
+
+      canvas.drawCircle(Offset(x, y), particle.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
 }
 
 // ==================== 登录界面 ====================
@@ -854,179 +1109,446 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  late AnimationController _pulseController;
+  late AnimationController _floatController;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _floatAnimation;
 
-  final List<Map<String, dynamic>> _pages = [
-    {
-      'icon': Icons.edit_note_rounded,
-      'title': '告诉我你想做什么',
-      'items': '"30 天读 5 本书"\n"每天冥想 10 分钟"\n"坚持早起 6 点起床"',
-    },
-    {
-      'icon': Icons.smart_toy_outlined,
-      'title': 'AI 帮你拆成每天任务',
-      'items': 'Day 1: 读第 1-20 页\nDay 2: 读第 21-40 页\nDay 3: 读第 41-60 页',
-    },
-    {
-      'icon': Icons.check_circle_outline_rounded,
-      'title': '每天打卡，看着自己进步',
-      'items': '连续打卡 7 天！🎉\n已完成 30%',
-    },
+  // 每页的独特配色和图标
+  final List<_OnboardingPageData> _pageData = [
+    _OnboardingPageData(
+      icon: Icons.lightbulb_outline_rounded,
+      secondaryIcon: Icons.auto_awesome_outline,
+      title: '告诉我你想做什么',
+      subtitle: '每一个大目标，都值得被认真对待',
+      description: '不管是读书、运动、还是学习新技能\n告诉我你的想法，AI 帮你梳理清晰',
+      gradientStart: const Color(0xFF1A4D3E),
+      gradientEnd: const Color(0xFF0D2F24),
+      accentColor: const Color(0xFFFFD54F),
+      blobColor: const Color(0x20FFD54F),
+    ),
+    _OnboardingPageData(
+      icon: Icons.auto_graph_rounded,
+      secondaryIcon: Icons.timeline_outlined,
+      title: 'AI 帮你拆成每天任务',
+      subtitle: '再远的目标，也能一步步到达',
+      description: 'AI 会把大目标拆成每天可做的小任务\n让你不再迷茫，知道今天该做什么',
+      gradientStart: const Color(0xFF2D5A46),
+      gradientEnd: const Color(0xFF1A3A2E),
+      accentColor: const Color(0xFF81C784),
+      blobColor: const Color(0x2081C784),
+    ),
+    _OnboardingPageData(
+      icon: Icons.celebration_outlined,
+      secondaryIcon: Icons.local_fire_department_rounded,
+      title: '每天打卡，看着自己进步',
+      subtitle: '坚持的力量，超乎你的想象',
+      description: '每完成一天都是胜利\n看着连续打卡天数增长，感受积累的力量',
+      gradientStart: const Color(0xFF3D6B52),
+      gradientEnd: const Color(0xFF2D4A3A),
+      accentColor: const Color(0xFFE07A5F),
+      blobColor: const Color(0x20E07A5F),
+    ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _floatController = AnimationController(
+      duration: const Duration(milliseconds: 3000),
+      vsync: this,
+    )..repeat(reverse: true);
+    _floatAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
+    );
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _pulseController.dispose();
+    _floatController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, AppColors.primaryDark],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() => _currentPage = index);
-                  },
-                  itemCount: _pages.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 160,
-                            height: 160,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              _pages[index]['icon'] as IconData,
-                              size: 80,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 48),
-                          Text(
-                            _pages[index]['title']!,
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _pages[index]['items']!,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                height: 1.8,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+      body: AnimatedBuilder(
+        animation: Listenable.merge([_pulseController, _floatController]),
+        builder: (context, child) {
+          final currentPageData = _pageData[_currentPage];
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 600),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  currentPageData.gradientStart,
+                  currentPageData.gradientEnd,
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 32),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        _pages.length,
-                        (index) => AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          width: _currentPage == index ? 28 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: _currentPage == index
-                                ? Colors.white
-                                : Colors.white.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(4),
+            ),
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() => _currentPage = index);
+                    },
+                    itemCount: _pageData.length,
+                    itemBuilder: (context, index) {
+                      final data = _pageData[index];
+                      final isCurrentPage = index == _currentPage;
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                        child: Column(
+                          children: [
+                            const Spacer(flex: 1),
+                            // 主图标区域
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // 光晕背景
+                                ScaleTransition(
+                                  scale: _pulseAnimation,
+                                  child: Container(
+                                    width: 220,
+                                    height: 220,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          data.accentColor.withOpacity(0.2),
+                                          data.accentColor.withOpacity(0.05),
+                                          Colors.transparent,
+                                        ],
+                                        stops: const [0.3, 0.6, 1.0],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // 装饰性圆环
+                                Transform.rotate(
+                                  angle: _floatAnimation.value * 0.3 - 0.15,
+                                  child: Container(
+                                    width: 200,
+                                    height: 200,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: data.accentColor.withOpacity(0.3),
+                                        width: 1.5,
+                                        strokeAlign: BorderSide.strokeAlignInside,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // 主图标容器
+                                Transform.translate(
+                                  offset: Offset(0, -_floatAnimation.value * 10 + 5),
+                                  child: Container(
+                                    width: 160,
+                                    height: 160,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Colors.white.withOpacity(0.25),
+                                          Colors.white.withOpacity(0.1),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.3),
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: data.accentColor.withOpacity(0.3),
+                                          blurRadius: 40,
+                                          spreadRadius: 5,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      data.icon,
+                                      size: 75,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                // 浮动小图标
+                                Positioned(
+                                  top: 20,
+                                  right: 30,
+                                  child: Transform.translate(
+                                    offset: Offset(_floatAnimation.value * 5, -_floatAnimation.value * 5),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: data.accentColor.withOpacity(0.3),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.5),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        data.secondaryIcon,
+                                        size: 20,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(flex: 1),
+                            // 副标题
+                            Opacity(
+                              opacity: isCurrentPage ? 1.0 : 0.7,
+                              child: Text(
+                                data.subtitle,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white.withOpacity(0.8),
+                                  letterSpacing: 1,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // 主标题
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                data.title,
+                                style: const TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                  height: 1.3,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            // 描述卡片
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                                backdropFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              ),
+                              child: Column(
+                                children: data.description.split('\n').map((line) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    child: Text(
+                                      line,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white.withOpacity(0.9),
+                                        height: 1.6,
+                                        letterSpacing: 0.3,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            const Spacer(flex: 2),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  // 顶部控制区
+                  Positioned(
+                    top: 16,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(width: 44),
+                        // 页面指示器
+                        Row(
+                          children: List.generate(
+                            _pageData.length,
+                            (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              width: _currentPage == index ? 24 : 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: _currentPage == index
+                                    ? _pageData[_currentPage].accentColor
+                                    : Colors.white.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    SizedBox(
-                      width: 200,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_currentPage < _pages.length - 1) {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          } else {
+                        // 跳过按钮
+                        TextButton(
+                          onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              PageRouteBuilder(
-                                pageBuilder: (context, animation, secondaryAnimation) =>
-                                    const LoginScreen(),
-                                transitionsBuilder:
-                                    (context, animation, secondaryAnimation, child) {
-                                  return FadeTransition(opacity: animation, child: child);
-                                },
-                                transitionDuration: const Duration(milliseconds: 500),
-                              ),
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
                             );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.tertiary,
-                          foregroundColor: const Color(0xFFFFFFFF),
-                          elevation: 8,
-                          shadowColor: Colors.black.withOpacity(0.2),
-                        ),
-                        child: Text(
-                          _currentPage < _pages.length - 1 ? '下一步' : '开始设定目标',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white.withOpacity(0.8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                          child: const Text(
+                            '跳过',
+                            style: TextStyle(fontSize: 15),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  // 底部按钮区
+                  Positioned(
+                    left: 24,
+                    right: 24,
+                    bottom: 32,
+                    child: Column(
+                      children: [
+                        // 进度条
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: (_currentPage + 1) / _pageData.length,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _pageData[_currentPage].accentColor,
+                            ),
+                            minHeight: 4,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // 主按钮
+                        SizedBox(
+                          width: double.infinity,
+                          height: 58,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_currentPage < _pageData.length - 1) {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeOutCubic,
+                                );
+                              } else {
+                                Navigator.pushReplacement(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation, secondaryAnimation) =>
+                                        const LoginScreen(),
+                                    transitionsBuilder:
+                                        (context, animation, secondaryAnimation, child) {
+                                      return FadeTransition(opacity: animation, child: child);
+                                    },
+                                    transitionDuration: const Duration(milliseconds: 600),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _pageData[_currentPage].accentColor,
+                              foregroundColor: Colors.white,
+                              elevation: 12,
+                              shadowColor: Colors.black.withOpacity(0.3),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _currentPage < _pageData.length - 1
+                                      ? '下一步'
+                                      : '开始设定目标',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  _currentPage < _pageData.length - 1
+                                      ? Icons.arrow_forward_rounded
+                                      : Icons.check_rounded,
+                                  size: 22,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+// 新手引导页数据结构
+class _OnboardingPageData {
+  final IconData icon;
+  final IconData secondaryIcon;
+  final String title;
+  final String subtitle;
+  final String description;
+  final Color gradientStart;
+  final Color gradientEnd;
+  final Color accentColor;
+  final Color blobColor;
+
+  _OnboardingPageData({
+    required this.icon,
+    required this.secondaryIcon,
+    required this.title,
+    required this.subtitle,
+    required this.description,
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.accentColor,
+    required this.blobColor,
+  });
 }
 
 // ==================== 主屏幕 ====================
