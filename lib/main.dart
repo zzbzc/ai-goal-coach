@@ -2435,7 +2435,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...dailyTasks.take(3).asMap().entries.map((entry) {
+                        ...dailyTasks.take(3).toList().asMap().entries.map((entry) {
                           final index = entry.key;
                           final task = entry.value;
                           return Container(
