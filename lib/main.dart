@@ -1121,7 +1121,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   final List<_OnboardingPageData> _pageData = [
     _OnboardingPageData(
       icon: Icons.lightbulb_outline_rounded,
-      secondaryIcon: Icons.auto_awesome_outline,
+      secondaryIcon: Icons.auto_awesome,
       title: '告诉我你想做什么',
       subtitle: '每一个大目标，都值得被认真对待',
       description: '不管是读书、运动、还是学习新技能\n告诉我你的想法，AI 帮你梳理清晰',
@@ -1350,35 +1350,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                             ),
                             const SizedBox(height: 20),
                             // 描述卡片
-                            Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                                backdropFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              ),
-                              child: Column(
-                                children: data.description.split('\n').map((line) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
-                                    child: Text(
-                                      line,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white.withOpacity(0.9),
-                                        height: 1.6,
-                                        letterSpacing: 0.3,
-                                      ),
-                                      textAlign: TextAlign.center,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.2),
+                                      width: 1,
                                     ),
-                                  );
-                                }).toList(),
+                                  ),
+                                  child: Column(
+                                    children: data.description.split('\n').map((line) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4),
+                                        child: Text(
+                                          line,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white.withOpacity(0.9),
+                                            height: 1.6,
+                                            letterSpacing: 0.3,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                               ),
                             ),
                             const Spacer(flex: 2),
