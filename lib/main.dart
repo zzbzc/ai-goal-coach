@@ -2267,6 +2267,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           dailyTimeAvailable: _selectedTime,
           experienceLevel: _selectedLevel,
         );
+        debugPrint('AI 计划生成成功：$aiPlan');
       } catch (e) {
         // AI 生成失败，继续创建目标但不显示计划
         debugPrint('AI 计划生成失败：$e');
@@ -2291,12 +2292,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         Navigator.pop(context, true);
 
         // 3. 展示 AI 生成的计划（如果有）
-        if (aiPlan != null && aiPlan.containsKey('daily_tasks')) {
+        if (aiPlan != null && (aiPlan.containsKey('daily_tasks') || aiPlan.containsKey('weekly_plans'))) {
           _showAIPlanDialog(aiPlan);
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('目标创建成功！AI 正在为你生成计划...')),
+              aiPlan == null
+                  ? const SnackBar(content: Text('目标创建成功！AI 计划生成失败，已为您创建目标'))
+                  : const SnackBar(content: Text('目标创建成功！')),
             );
           }
         }
@@ -2653,14 +2656,18 @@ class _CheckinScreenState extends State<CheckinScreen> {
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [1, 2, 3, 4, 5].map((rating) {
-                  return IconButton(
-                    icon: Icon(
-                      rating <= moodRating ? Icons.sentiment_satisfied : Icons.sentiment_satisfied_outlined,
-                      color: rating <= moodRating ? AppColors.tertiary : AppColors.neutral400,
-                      size: 32,
+                  return SizedBox(
+                    width: 44,
+                    child: IconButton(
+                      icon: Icon(
+                        rating <= moodRating ? Icons.sentiment_satisfied : Icons.sentiment_satisfied_outlined,
+                        color: rating <= moodRating ? AppColors.tertiary : AppColors.neutral400,
+                        size: 32,
+                      ),
+                      onPressed: () => setState(() => moodRating = rating),
                     ),
-                    onPressed: () => setState(() => moodRating = rating),
                   );
                 }).toList(),
               ),
