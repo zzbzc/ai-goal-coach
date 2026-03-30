@@ -649,8 +649,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             child: TextButton(
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('注册功能暂未开放，请联系管理员创建账号'),
+                                  SnackBar(
+                                    content: const Text('注册功能暂未开放，请联系管理员创建账号'),
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
