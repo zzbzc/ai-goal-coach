@@ -1423,51 +1423,309 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 }
 
 // ==================== 打卡屏幕 ====================
-class CheckinScreen extends StatelessWidget {
+class CheckinScreen extends StatefulWidget {
   const CheckinScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('快速打卡'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.primary,
-      ),
-      body: Center(
+  State<CheckinScreen> createState() => _CheckinScreenState();
+}
+
+class _CheckinScreenState extends State<CheckinScreen> {
+  final CheckinService _checkinService = CheckinService();
+  final GoalService _goalService = GoalService();
+  List<dynamic> _goals = [];
+  List<dynamic> _recentCheckins = [];
+  int _streakCount = 0;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      final goals = await _goalService.getGoals();
+      final checkins = await _checkinService.getCheckins();
+      final streak = await _checkinService.getStreak();
+      setState(() {
+        _goals = goals;
+        _recentCheckins = checkins.take(5).toList();
+        _streakCount = streak;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showCheckinDialog(dynamic goal) {
+    final notesController = TextEditingController();
+    int moodRating = 4;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(60),
+              const Text('完成打卡！', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+              const SizedBox(height: 8),
+              Text('目标：${goal['title']}', style: TextStyle(color: AppColors.neutral600)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: notesController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: '分享学习心得...（可选）',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.all(12),
                 ),
-                child: const Icon(
-                  Icons.check_circle_outline,
-                  size: 60,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                '今日任务已完成！',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900),
               ),
               const SizedBox(height: 16),
-              Text(
-                '连续打卡 7 天，继续保持！',
-                style: TextStyle(fontSize: 16, color: AppColors.neutral600),
+              Text('心情评分：', style: TextStyle(color: AppColors.neutral600)),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [1, 2, 3, 4, 5].map((rating) {
+                  return IconButton(
+                    icon: Icon(
+                      rating <= moodRating ? Icons.sentiment_satisfied : Icons.sentiment_satisfied_outlined,
+                      color: rating <= moodRating ? AppColors.tertiary : AppColors.neutral400,
+                      size: 32,
+                    ),
+                    onPressed: () => setState(() => moodRating = rating),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await _checkinService.createCheckin(
+                        goalId: goal['id'],
+                        notes: notesController.text.isNotEmpty ? notesController.text : null,
+                        moodRating: moodRating,
+                      );
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('打卡成功！')),
+                        );
+                        _loadData();
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('打卡失败：$e')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('完成打卡'),
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('打卡'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('打卡'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 80, color: AppColors.error),
+              const SizedBox(height: 32),
+              const Text('加载失败', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+              Text(_errorMessage ?? '未知错误', style: TextStyle(fontSize: 16, color: AppColors.neutral500)),
+              const SizedBox(height: 40),
+              ElevatedButton(onPressed: _loadData, child: const Text('重试')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('打卡'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.primary,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 连续打卡统计
+            Card(
+              color: AppColors.primary,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.local_fire_department, size: 40, color: Colors.white),
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$_streakCount 天',
+                          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        Text(
+                          '连续打卡',
+                          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // 快速打卡
+            Text('我的目标', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+            const SizedBox(height: 12),
+            if (_goals.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.my_location_outlined, size: 80, color: AppColors.neutral300),
+                      const SizedBox(height: 16),
+                      Text('还没有目标', style: TextStyle(color: AppColors.neutral500)),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ..._goals.map((goal) => Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 24),
+                  ),
+                  title: Text(goal['title'] ?? '未命名目标', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+                  subtitle: Text('第${goal['current_day'] ?? 0}天 / 共${goal['total_days'] ?? 0}天', style: TextStyle(color: AppColors.neutral600)),
+                  trailing: ElevatedButton(
+                    onPressed: () => _showCheckinDialog(goal),
+                    child: const Text('打卡'),
+                  ),
+                ),
+              )),
+            const SizedBox(height: 24),
+            // 最近打卡记录
+            if (_recentCheckins.isNotEmpty) ...[
+              Text('最近打卡', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+              const SizedBox(height: 12),
+              ..._recentCheckins.map((checkin) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.tertiary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.check_circle,
+                          color: AppColors.tertiary,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              checkin['notes'] ?? '打卡记录',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '心情：${'⭐' * (checkin['mood_rating'] ?? 0)}',
+                              style: TextStyle(color: AppColors.neutral600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        _formatDate(checkin['created_at']),
+                        style: TextStyle(color: AppColors.neutral500, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.month}/${date.day}';
+    } catch (e) {
+      return '';
+    }
   }
 }
 
@@ -1792,11 +2050,80 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 }
 
 // ==================== 社群屏幕 ====================
-class CommunityScreen extends StatelessWidget {
+class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
 
   @override
+  State<CommunityScreen> createState() => _CommunityScreenState();
+}
+
+class _CommunityScreenState extends State<CommunityScreen> {
+  final PartnerService _partnerService = PartnerService();
+  List<dynamic> _partners = [];
+  List<dynamic> _challenges = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      final partners = await _partnerService.getPartners();
+      final challenges = await _partnerService.getChallenges(status: 'active');
+      setState(() {
+        _partners = partners;
+        _challenges = challenges;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('学习伙伴'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('学习伙伴'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 80, color: AppColors.error),
+              const SizedBox(height: 32),
+              const Text('加载失败', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+              Text(_errorMessage ?? '未知错误', style: TextStyle(fontSize: 16, color: AppColors.neutral500)),
+              const SizedBox(height: 40),
+              ElevatedButton(onPressed: _loadData, child: const Text('重试')),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('学习伙伴'),
@@ -1806,11 +2133,27 @@ class CommunityScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('和你一起打卡的人 (23)', style: TextStyle(fontSize: 14, color: AppColors.neutral600, fontWeight: FontWeight.w600)),
+          Text('和你一起打卡的人 (${_partners.length})', style: TextStyle(fontSize: 14, color: AppColors.neutral600, fontWeight: FontWeight.w600)),
           const SizedBox(height: 12),
-          _buildUserItem('👤', '张三', '30 天读 5 本书', 15),
-          _buildUserItem('👤', '李四', '30 天读 5 本书', 12),
-          _buildUserItem('👤', '王五', '30 天读 5 本书', 8),
+          if (_partners.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.people_outline, size: 80, color: AppColors.neutral300),
+                    const SizedBox(height: 16),
+                    Text('还没有学习伙伴', style: TextStyle(fontSize: 16, color: AppColors.neutral500)),
+                  ],
+                ),
+              ),
+            )
+          else
+            ..._partners.map((partner) => _buildUserItem(
+              partner['partner_username'] ?? '未知用户',
+              partner['partner_avatar_url'],
+              partner['status'] ?? 'accepted',
+            )),
           const SizedBox(height: 24),
           Card(
             child: Padding(
@@ -1826,33 +2169,48 @@ class CommunityScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  InkWell(
-                    onTap: () {},
-                    child: Container(
+                  if (_challenges.isEmpty)
+                    Padding(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.cardBackground,
-                        borderRadius: BorderRadius.circular(12),
+                      child: Center(
+                        child: Text('暂无正在进行的挑战', style: TextStyle(color: AppColors.neutral500)),
                       ),
-                      child: Row(
-                        children: [
-                          const Text('🎯', style: TextStyle(fontSize: 28)),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('7 天打卡挑战赛', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.neutral900)),
-                                SizedBox(height: 4),
-                                Text('已有 56 人参加', style: TextStyle(fontSize: 13, color: AppColors.neutral500)),
-                              ],
+                    )
+                  else
+                    ..._challenges.map((challenge) => InkWell(
+                      onTap: () => _joinChallenge(challenge['id']),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(challenge['icon'] ?? '🎯', style: const TextStyle(fontSize: 28)),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    challenge['name'] ?? '未命名挑战',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.neutral900),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '已有 ${challenge['current_participants'] ?? 0} 人参加',
+                                    style: TextStyle(fontSize: 13, color: AppColors.neutral500),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Icon(Icons.chevron_right, color: AppColors.neutral400),
-                        ],
+                            Icon(Icons.chevron_right, color: AppColors.neutral400),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
+                    )),
                 ],
               ),
             ),
@@ -1862,7 +2220,18 @@ class CommunityScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserItem(String avatar, String name, String goal, int streak) {
+  Widget _buildUserItem(String username, String? avatarUrl, String status) {
+    final statusColors = {
+      'pending': AppColors.warning,
+      'accepted': AppColors.success,
+      'rejected': AppColors.error,
+    };
+    final statusLabels = {
+      'pending': '等待接受',
+      'accepted': '已接受',
+      'rejected': '已拒绝',
+    };
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -1873,34 +2242,141 @@ class CommunityScreen extends StatelessWidget {
             color: AppColors.neutral200,
             borderRadius: BorderRadius.circular(24),
           ),
-          child: Center(child: Text(avatar, style: const TextStyle(fontSize: 20))),
+          child: avatarUrl != null
+              ? ClipOval(child: Image.network(avatarUrl, fit: BoxFit.cover))
+              : const Center(child: Text('👤', style: TextStyle(fontSize: 20))),
         ),
-        title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-        subtitle: Text('目标：$goal', style: TextStyle(fontSize: 12, color: AppColors.neutral600)),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text('🔥 $streak 天', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+        title: Text(username, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+        subtitle: Text(
+          statusLabels[status] ?? '未知状态',
+          style: TextStyle(fontSize: 12, color: statusColors[status] ?? AppColors.neutral600),
         ),
       ),
     );
   }
+
+  Future<void> _joinChallenge(String challengeId) async {
+    try {
+      await _partnerService.joinChallenge(challengeId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已成功加入挑战！')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('加入失败：$e')),
+        );
+      }
+    }
+  }
 }
 
 // ==================== 个人中心屏幕 ====================
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final AuthService _authService = AuthService();
+  final CheckinService _checkinService = CheckinService();
+  Map<String, dynamic>? _user;
+  int _streakCount = 0;
+  int _completedGoals = 0;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authService.getCurrentUser();
+      final streak = await _checkinService.getStreak();
+      setState(() {
+        _user = user;
+        _streakCount = streak;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.logout();
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('登出失败：$e')),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('我的'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('我的'),
+          backgroundColor: Colors.transparent,
+          foregroundColor: AppColors.primary,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 80, color: AppColors.error),
+              const SizedBox(height: 32),
+              const Text('加载失败', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
+              Text(_errorMessage ?? '未知错误', style: TextStyle(fontSize: 16, color: AppColors.neutral500)),
+              const SizedBox(height: 40),
+              ElevatedButton(onPressed: _loadUserData, child: const Text('重试')),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('我的'),
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.primary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _handleLogout,
+            tooltip: '登出',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -1914,11 +2390,19 @@ class ProfileScreen extends StatelessWidget {
                 gradient: const LinearGradient(colors: [AppColors.tertiary, AppColors.warning]),
                 borderRadius: BorderRadius.circular(50),
               ),
-              child: const Icon(Icons.person, size: 50, color: Colors.white),
+              child: _user?['avatar_url'] != null
+                  ? ClipOval(child: Image.network(_user!['avatar_url']!, fit: BoxFit.cover))
+                  : const Icon(Icons.person, size: 50, color: Colors.white),
             ),
             const SizedBox(height: 16),
-            const Text('用户名', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-            Text('已加入 7 天', style: TextStyle(fontSize: 14, color: AppColors.neutral500)),
+            Text(
+              _user?['username'] ?? '用户名',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900),
+            ),
+            Text(
+              _user?['email'] ?? '',
+              style: TextStyle(fontSize: 14, color: AppColors.neutral500),
+            ),
             const SizedBox(height: 24),
             Card(
               child: Padding(
@@ -1926,24 +2410,9 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatItem('7', '已坚持天数'),
-                    _buildStatItem('2', '完成目标'),
-                    _buildStatItem('3', '获得成就'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('🏅 我的成就', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral800)),
-                    const SizedBox(height: 12),
-                    _buildAchievementItem('🏅', '连续打卡 7 天', '2026-03-23 获得'),
-                    _buildAchievementItem('🏅', '完成第一个目标', '2026-03-20 获得'),
+                    _buildStatItem('$_streakCount', '连续打卡'),
+                    _buildStatItem('$_completedGoals', '完成目标'),
+                    _buildStatItem('0', '获得成就'),
                   ],
                 ),
               ),
@@ -1956,7 +2425,7 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(height: 1, indent: 60),
                   _buildSettingItem(Icons.lock_outline, '隐私设置'),
                   const Divider(height: 1, indent: 60),
-                  _buildSettingItem(Icons.star_outline, '付费会员', showBadge: true),
+                  _buildSettingItem(Icons.logout, '登出', onTap: _handleLogout),
                 ],
               ),
             ),
@@ -1976,48 +2445,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAchievementItem(String icon, String title, String date) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 32)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-                Text(date, style: TextStyle(fontSize: 12, color: AppColors.neutral500)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingItem(IconData icon, String title, {bool showBadge = false}) {
+  Widget _buildSettingItem(IconData icon, String title, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primary),
       title: Text(title, style: const TextStyle(color: AppColors.neutral900)),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showBadge)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text('NEW', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-            ),
-          if (showBadge) const SizedBox(width: 8),
-          Icon(Icons.chevron_right, color: AppColors.neutral400),
-        ],
-      ),
-      onTap: () {},
+      trailing: Icon(Icons.chevron_right, color: AppColors.neutral400),
+      onTap: onTap ?? () {},
     );
   }
 }

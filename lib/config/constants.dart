@@ -14,4 +14,6 @@ class AppConfig {
 
   static String get goalsUrl => '$baseUrl$apiPrefix/goals';
   static String get checkinsUrl => '$baseUrl$apiPrefix/checkins';
+  static String get partnersUrl => '$baseUrl$apiPrefix/partners/partners';
+  static String get challengesUrl => '$baseUrl$apiPrefix/partners/challenges';
 }
