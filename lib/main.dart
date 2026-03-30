@@ -2435,7 +2435,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...dailyTasks.take(3).map((task, index) => Container(
+                        ...dailyTasks.take(3).asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final task = entry.value;
+                          return Container(
                           margin: const EdgeInsets.only(bottom: 10),
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
@@ -2515,7 +2518,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                               ],
                             ],
                           ),
-                        )),
+                        );
+                        }),
                       ],
                     ],
                   ),
