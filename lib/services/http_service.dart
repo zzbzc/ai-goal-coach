@@ -122,7 +122,10 @@ class HttpService {
       if (response.body.isEmpty) return null;
       return jsonDecode(response.body);
     } else if (response.statusCode == 401) {
-      // Token 过期，尝试刷新
+      // Token 过期，尝试刷新（如果没有 Token 则直接失败）
+      if (_accessToken == null && _refreshToken == null) {
+        throw Exception('请先登录');
+      }
       final refreshed = await _refreshAccessToken();
       if (refreshed) {
         // 重试原请求

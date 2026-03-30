@@ -548,23 +548,9 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
-        // 检测是否为认证失败
-        if (_errorMessage!.contains('认证失败') || _errorMessage!.contains('401')) {
-          _navigateToLogin(context);
-        }
         _isLoading = false;
       });
     }
-  }
-
-  void _navigateToLogin(BuildContext context) {
-    // 跳转到启动页（实际应用中应该跳转到登录页面）
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const SplashScreen()),
-        (route) => false,
-      );
-    });
   }
 
   @override
@@ -604,6 +590,9 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
   }
 
   Widget _buildErrorState() {
+    // 检测是否为未登录错误
+    final isNotLoggedIn = _errorMessage!.contains('请先登录');
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -614,19 +603,19 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: isNotLoggedIn ? AppColors.info.withOpacity(0.1) : AppColors.error.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(80),
               ),
-              child: const Icon(
-                Icons.error_outline,
+              child: Icon(
+                isNotLoggedIn ? Icons.login_outlined : Icons.error_outline,
                 size: 80,
-                color: AppColors.error,
+                color: isNotLoggedIn ? AppColors.info : AppColors.error,
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              '加载失败',
-              style: TextStyle(
+            Text(
+              isNotLoggedIn ? '请先登录' : '加载失败',
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.neutral900,
@@ -634,7 +623,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              _errorMessage ?? '未知错误',
+              isNotLoggedIn ? '登录后才能查看和管理目标' : (_errorMessage ?? '未知错误'),
               style: TextStyle(
                 fontSize: 16,
                 color: AppColors.neutral500,
@@ -646,11 +635,15 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               width: 220,
               height: 56,
               child: ElevatedButton.icon(
-                onPressed: _loadGoals,
-                icon: const Icon(Icons.refresh),
-                label: const Text(
-                  '重试',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                onPressed: () {
+                  // TODO: 跳转到登录页面
+                  // 暂时返回首页
+                  Navigator.of(context).pushNamedAndRemoveUntil('/onboarding', (route) => false);
+                },
+                icon: const Icon(Icons.login),
+                label: Text(
+                  isNotLoggedIn ? '去登录' : '重试',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
