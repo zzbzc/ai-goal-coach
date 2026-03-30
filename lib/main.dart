@@ -53,14 +53,6 @@ void main() async {
 class AIGoalCoachApp extends StatelessWidget {
   const AIGoalCoachApp({super.key});
 
-  // 检查是否已登录（有 Token 即认为已登录）
-  bool _isLoggedIn() {
-    // Token 是否存在由 HttpService 内部管理
-    // 这里简化处理，认为有 token 就是登录状态
-    // 实际有效性由 API 调用结果决定
-    return true; // 如果 HttpService 中有 token 则返回 true
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -565,9 +557,12 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
   }
 
   void _navigateToLogin(BuildContext context) {
-    // 跳转到登录页（这里简单返回到启动页，实际应用中应该跳转到登录页面）
+    // 跳转到启动页（实际应用中应该跳转到登录页面）
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/splash', (route) => false);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const SplashScreen()),
+        (route) => false,
+      );
     });
   }
 
