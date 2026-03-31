@@ -24,8 +24,9 @@ class GoalService {
     required DateTime endDate,
     required String dailyTimeAvailable,
     required String experienceLevel,
+    List<Map<String, dynamic>>? tasks, // AI 生成的每日任务
   }) async {
-    return await _http.post(AppConfig.goalsUrl, {
+    final Map<String, dynamic> data = {
       'title': title,
       'description': description,
       'icon': icon,
@@ -33,7 +34,17 @@ class GoalService {
       'end_date': endDate.toIso8601String().split('T')[0],
       'daily_time_available': dailyTimeAvailable,
       'experience_level': experienceLevel,
-    });
+    };
+    // 如果有任务，添加到请求中
+    if (tasks != null && tasks.isNotEmpty) {
+      data['tasks'] = tasks.map((task) => {
+        'day_number': task['day_number'],
+        'title': task['title'],
+        'description': task['description'],
+        'estimated_minutes': task['estimated_minutes'],
+      }).toList();
+    }
+    return await _http.post(AppConfig.goalsUrl, data);
   }
 
   /// 获取目标详情

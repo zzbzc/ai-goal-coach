@@ -2355,9 +2355,20 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         aiPlan = null;
       }
 
-      // 2. 创建目标
+      // 2. 创建目标（带上 AI 生成的任务）
       final startDate = DateTime.now();
       final endDate = startDate.add(Duration(days: _selectedDurationDays));
+
+      // 提取 AI 生成的 daily_tasks
+      List<Map<String, dynamic>>? dailyTasks;
+      if (aiPlan != null && aiPlan['daily_tasks'] != null) {
+        dailyTasks = (aiPlan['daily_tasks'] as List).map((task) => {
+          'day_number': task['day_number'] as int,
+          'title': task['title'] as String,
+          'description': task['description'] as String?,
+          'estimated_minutes': task['estimated_minutes'] as int?,
+        }).toList();
+      }
 
       final result = await _goalService.createGoal(
         title: _goalController.text,
@@ -2367,6 +2378,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         endDate: endDate,
         dailyTimeAvailable: _selectedTime,
         experienceLevel: _selectedLevel,
+        tasks: dailyTasks, // 传递 AI 生成的任务
       );
 
       if (mounted) {
