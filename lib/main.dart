@@ -1683,7 +1683,7 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                 MaterialPageRoute(builder: (context) => const CreateGoalScreen()),
               ).then((value) {
                 if (value == true) {
-                  setState(() => _hasGoals = true);
+                  _loadGoals(); // 刷新目标列表
                 }
               });
             },
@@ -1829,6 +1829,46 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
     );
   }
 
+  void _showDeleteConfirmDialog(BuildContext context, String goalId, String goalTitle) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('删除目标', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('确定要删除「$goalTitle」吗？删除后无法恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                final goalService = GoalService();
+                await goalService.deleteGoal(goalId);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('删除成功')),
+                  );
+                  _loadGoals(); // 刷新列表
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('删除失败：$e')),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGoalsList() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -1958,16 +1998,24 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      '去打卡',
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'delete') {
+                        _showDeleteConfirmDialog(context, goal['id'], goal['title']);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                            SizedBox(width: 8),
+                            Text('删除目标', style: TextStyle(color: AppColors.error)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -2010,11 +2058,41 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                   children: [
                     const Icon(Icons.today, size: 18, color: AppColors.neutral600),
                     const SizedBox(width: 8),
-                    Text(
-                      '今天：${goal['today_task'] ?? '暂无任务'}',
-                      style: const TextStyle(fontSize: 14, color: AppColors.neutral700),
+                    Expanded(
+                      child: Text(
+                        '今天：${goal['today_task'] ?? '暂无任务'}',
+                        style: const TextStyle(fontSize: 14, color: AppColors.neutral700),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GoalDetailScreen(goalId: goal['id']),
+                      ),
+                    ).then((value) {
+                      if (value == true) _loadGoals();
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    '去打卡',
+                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
