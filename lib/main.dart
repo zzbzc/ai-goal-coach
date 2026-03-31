@@ -3307,7 +3307,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('打卡成功！')),
                         );
-                        _loadData(); // 刷新页面数据
+                        _loadGoalData(); // 刷新页面数据
                       }
                     } catch (e) {
                       if (context.mounted) {
