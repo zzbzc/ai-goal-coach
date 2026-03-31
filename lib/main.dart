@@ -2267,7 +2267,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           dailyTimeAvailable: _selectedTime,
           experienceLevel: _selectedLevel,
         );
-        debugPrint('AI 计划生成成功：${aiPlan?.keys}');
+        debugPrint('AI 计划生成成功！');
+        debugPrint('  - 包含的键：${aiPlan?.keys.join(', ')}');
+        debugPrint('  - daily_tasks 数量：${(aiPlan?['daily_tasks'] as List?)?.length ?? 0}');
+        debugPrint('  - weekly_plans 数量：${(aiPlan?['weekly_plans'] as List?)?.length ?? 0}');
       } catch (e) {
         // AI 生成失败，继续创建目标但不显示计划
         debugPrint('AI 计划生成失败：$e');
@@ -2315,6 +2318,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
   // 展示 AI 计划对话框
   void _showAIPlanDialog(Map<String, dynamic> plan) {
+    debugPrint('【AI 计划对话框】开始展示');
+    debugPrint('  - 传入的 plan 键：${plan.keys.join(', ')}');
+    debugPrint('  - daily_tasks: ${(plan['daily_tasks'] as List?)?.length ?? 0} 条');
+    debugPrint('  - weekly_plans: ${(plan['weekly_plans'] as List?)?.length ?? 0} 条');
+
     final dailyTasks = plan['daily_tasks'] as List<dynamic>? ?? [];
     final weeklyPlans = plan['weekly_plans'] as List<dynamic>? ?? [];
 
@@ -3299,6 +3307,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('打卡成功！')),
                         );
+                        _loadData(); // 刷新页面数据
                       }
                     } catch (e) {
                       if (context.mounted) {
