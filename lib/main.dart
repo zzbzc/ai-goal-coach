@@ -2321,58 +2321,77 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
-          constraints: const BoxConstraints(maxHeight: 500, maxWidth: 400),
+          constraints: const BoxConstraints(maxHeight: 550, maxWidth: 420),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primaryContainer, AppColors.secondaryContainer],
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: AppColors.tertiary.withOpacity(0.3),
+              width: 2,
             ),
-            borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 头部
+              // 头部 - 珊瑚红点缀
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.tertiaryContainer.withOpacity(0.5),
+                      Colors.white,
+                    ],
+                  ),
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [AppColors.tertiary, AppColors.tertiary.withOpacity(0.8)],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.tertiary.withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+                      child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 26),
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
+                    const SizedBox(width: 16),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'AI 计划已生成',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                              color: AppColors.neutral900,
+                              letterSpacing: -0.3,
                             ),
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             '已为你定制专属学习计划',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.neutral600,
+                              color: AppColors.neutral500,
+                              height: 1.3,
                             ),
                           ),
                         ],
@@ -2384,143 +2403,215 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               // 内容区
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // 周计划概览
                       if (weeklyPlans.isNotEmpty) ...[
-                        const Text(
-                          '阶段目标',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.neutral800,
-                          ),
+                        Row(
+                          children: [
+                            Icon(Icons.flag_rounded, size: 18, color: AppColors.tertiary),
+                            const SizedBox(width: 8),
+                            const Text(
+                              '阶段目标',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.neutral800,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 12),
-                        ...weeklyPlans.take(3).map((week) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  '第${week['week_number']}周：${week['title']}',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.neutral700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
-                        const SizedBox(height: 16),
-                      ],
-                      // 前 3 天的任务
-                      if (dailyTasks.isNotEmpty) ...[
-                        const Text(
-                          '前 3 天任务',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.neutral800,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ...dailyTasks.take(3).toList().asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final task = entry.value;
-                          return Container(
+                        ...weeklyPlans.take(3).map((week) => Container(
                           margin: const EdgeInsets.only(bottom: 10),
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.primaryContainer.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.15),
+                              width: 1,
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'W${week['week_number']}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
                                       color: AppColors.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      task['title'],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      week['title'],
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.neutral800,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    if (week.containsKey('description'))
+                                      Text(
+                                        week['description'],
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.neutral500,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                              if (task.containsKey('description')) ...[
-                                const SizedBox(height: 6),
-                                Text(
-                                  task['description'],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: AppColors.neutral500,
-                                  ),
+                            ],
+                          ),
+                        )),
+                        const SizedBox(height: 20),
+                      ],
+                      // 前 3 天的任务
+                      if (dailyTasks.isNotEmpty) ...[
+                        Row(
+                          children: [
+                            Icon(Icons.event_rounded, size: 18, color: AppColors.tertiary),
+                            const SizedBox(width: 8),
+                            const Text(
+                              '前 3 天任务',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.neutral800,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ...dailyTasks.take(3).toList().asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final task = entry.value;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: AppColors.neutral200.withOpacity(0.5),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.neutral200.withOpacity(0.15),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
-                              if (task.containsKey('estimated_minutes')) ...[
-                                const SizedBox(height: 6),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 序号徽章
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  width: 36,
+                                  height: 36,
                                   decoration: BoxDecoration(
-                                    color: AppColors.primaryContainer,
-                                    borderRadius: BorderRadius.circular(6),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.tertiary.withOpacity(0.15),
+                                        AppColors.tertiary.withOpacity(0.05),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Text(
-                                    '预计 ${task['estimated_minutes']} 分钟',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w500,
+                                  child: Center(
+                                    child: Text(
+                                      'D${index + 1}',
+                                      style: TextStyle(
+                                        color: AppColors.tertiary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        task['title'],
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.neutral800,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                      if (task.containsKey('description')) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          task['description'],
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.neutral500,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ],
+                                      if (task.containsKey('estimated_minutes')) ...[
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primaryContainer.withOpacity(0.5),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.access_time_rounded,
+                                                size: 12,
+                                                color: AppColors.primary,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${task['estimated_minutes']}分钟',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: AppColors.primary,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ],
-                            ],
-                          ),
-                        );
+                            ),
+                          );
                         }),
                       ],
                     ],
@@ -2528,18 +2619,33 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                 ),
               ),
               // 底部按钮
-              Padding(
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.neutral50,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(24),
+                    bottomRight: Radius.circular(24),
+                  ),
+                  border: Border(
+                    top: BorderSide(
+                      color: AppColors.neutral200.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                ),
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 48,
+                  height: 52,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: AppColors.tertiary,
                       foregroundColor: Colors.white,
+                      elevation: 0,
+                      shadowColor: AppColors.tertiary.withOpacity(0.3),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                     child: const Row(
@@ -2550,10 +2656,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 0.3,
                           ),
                         ),
-                        SizedBox(width: 6),
-                        Icon(Icons.arrow_forward, size: 18),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward_rounded, size: 20),
                       ],
                     ),
                   ),
