@@ -13,19 +13,23 @@ class AppColors {
   static const primaryContainer = Color(0xFFE8F5EF);
   static const onPrimaryContainer = Color(0xFF0F1F18);
   static const primaryDark = Color(0xFF1F3D30);
+  static const primaryLight = Color(0xFF4A7C63);
 
   // 辅色 - 鼠尾草绿
   static const secondary = Color(0xFF87A892);
   static const secondaryContainer = Color(0xFFD1E8DC);
+  static const secondaryLight = Color(0xFFA8C4B0);
 
   // 点缀色 - 珊瑚红
   static const tertiary = Color(0xFFE07A5F);
   static const tertiaryContainer = Color(0xFFFFF5F3);
   static const onTertiaryContainer = Color(0xFF3D1F18);
+  static const tertiaryLight = Color(0xFFFF9B85);
 
   // 中性色 - 暖灰系
   static const neutral50 = Color(0xFFFAF9F7);    // 主背景
   static const neutral100 = Color(0xFFF2F0EB);   // 次级背景
+  static const neutral150 = Color(0xFFEAE6DD);   // 卡片背景
   static const neutral200 = Color(0xFFE6E2D8);   // 边框/分割线
   static const neutral300 = Color(0xFFD4CFC6);   // 弱化边框
   static const neutral400 = Color(0xFFB5ADA0);   // 弱化文字
@@ -42,8 +46,53 @@ class AppColors {
   static const info = Color(0xFF6B9AC4);
 
   // 功能色 - 卡片背景/强调背景
-  static const cardBackground = Color(0xFFF1F5F9);
+  static const cardBackground = Color(0xFFFFFFFF);
+  static const cardBackgroundAlt = Color(0xFFF8F6F0);
   static const inputBackground = Color(0xFFFFFFFF);
+
+  // 渐变色定义
+  static const gradientPrimary = LinearGradient(
+    colors: [primary, primaryDark],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const gradientTertiary = LinearGradient(
+    colors: [tertiary, Color(0xFFD66A52)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const gradientWarm = LinearGradient(
+    colors: [Color(0xFFFFF5F3), Color(0xFFFFE8E0)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+}
+
+// 阴影定义
+class AppShadows {
+  const AppShadows._();
+
+  static List<BoxShadow> get sm => [
+    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
+  ];
+
+  static List<BoxShadow> get md => [
+    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
+    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
+  ];
+
+  static List<BoxShadow> get lg => [
+    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.1), blurRadius: 24, offset: const Offset(0, 8)),
+    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4)),
+  ];
+
+  static List<BoxShadow> get coloredPrimary => [
+    BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6)),
+  ];
+
+  static List<BoxShadow> get coloredTertiary => [
+    BoxShadow(color: AppColors.tertiary.withOpacity(0.3), blurRadius: 16, offset: const Offset(0, 6)),
+  ];
 }
 
 void main() async {
@@ -1956,11 +2005,17 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
 
   /// 从后端数据构建目标卡片
   Widget _buildGoalCardFromData(dynamic goal) {
-    final int totalDays = (goal['total_days'] ?? 30);
+    final int totalDays = (goal['duration_days'] ?? 30);
     final int currentDay = (goal['current_day'] ?? 0);
     final double progress = totalDays > 0 ? currentDay / totalDays : 0.0;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.neutral200.withOpacity(0.6), width: 1),
+        boxShadow: AppShadows.md,
+      ),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -1968,9 +2023,11 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
             MaterialPageRoute(
               builder: (context) => GoalDetailScreen(goalId: goal['id']),
             ),
-          );
+          ).then((value) {
+            if (value == true) _loadGoals();
+          });
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -1979,23 +2036,51 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
               Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        colors: [AppColors.primaryContainer, AppColors.primary.withOpacity(0.15)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
                     ),
-                    child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 24),
+                    child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 28),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: Text(
-                      goal['title'] ?? '未命名目标',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.neutral900,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          goal['title'] ?? '未命名目标',
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.neutral900,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '第 $currentDay / $totalDays 天',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryDark,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   PopupMenuButton<String>(
@@ -2005,13 +2090,20 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline, color: AppColors.error, size: 20),
-                            SizedBox(width: 8),
-                            Text('删除目标', style: TextStyle(color: AppColors.error)),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Icon(Icons.close_rounded, color: AppColors.error, size: 16),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text('删除目标', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w500)),
                           ],
                         ),
                       ),
@@ -2019,58 +2111,115 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: AppColors.neutral200,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  minHeight: 8,
+              const SizedBox(height: 18),
+              // 渐变进度条
+              Container(
+                height: 12,
+                decoration: BoxDecoration(
+                  color: AppColors.neutral150,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * progress - 60,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primary, AppColors.primaryLight],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '第$currentDay 天 / 共$totalDays 天',
-                    style: TextStyle(fontSize: 13, color: AppColors.neutral600),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.neutral500),
+                      const SizedBox(width: 6),
+                      Text(
+                        '第$currentDay 天 / 共$totalDays 天',
+                        style: TextStyle(fontSize: 12, color: AppColors.neutral600, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                  Text(
-                    '${(progress * 100).toInt()}%',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: progress > 0.5 ? AppColors.primaryContainer : AppColors.neutral150,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${(progress * 100).toInt()}%',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: progress > 0.5 ? AppColors.primaryDark : AppColors.neutral600,
+                        letterSpacing: -0.3,
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              // 今日任务卡片
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    colors: [AppColors.tertiaryContainer, Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.tertiary.withOpacity(0.15), width: 1),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.today, size: 18, color: AppColors.neutral600),
-                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.tertiary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.today_rounded, size: 18, color: AppColors.tertiary),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        '今天：${goal['today_task'] ?? '暂无任务'}',
-                        style: const TextStyle(fontSize: 14, color: AppColors.neutral700),
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '今天',
+                            style: TextStyle(fontSize: 11, color: AppColors.neutral500, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            goal['today_task'] ?? '暂无任务',
+                            style: const TextStyle(fontSize: 14, color: AppColors.neutral800, fontWeight: FontWeight.w600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
+              // 打卡按钮
               SizedBox(
                 width: double.infinity,
+                height: 44,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -2084,14 +2233,23 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    '去打卡',
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle_rounded, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        '去打卡',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.2),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -2954,105 +3112,233 @@ class _CheckinScreenState extends State<CheckinScreen> {
         title: const Text('打卡'),
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.primary,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 连续打卡统计
-            Card(
-              color: AppColors.primary,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.local_fire_department, size: 40, color: Colors.white),
-                    ),
-                    const SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$_streakCount 天',
-                          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        Text(
-                          '连续打卡',
-                          style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8)),
-                        ),
-                      ],
-                    ),
-                  ],
+            // 连续打卡统计 - 渐变卡片
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.tertiary, AppColors.tertiaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: AppShadows.coloredTertiary,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(Icons.local_fire_department_rounded, size: 40, color: Colors.white),
+                  ),
+                  const SizedBox(width: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$_streakCount',
+                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -1),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '连续打卡天数',
+                        style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-            // 快速打卡
-            Text('我的目标', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 28),
+            // 我的目标
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.gradientPrimary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text('我的目标', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
+              ],
+            ),
+            const SizedBox(height: 16),
             if (_goals.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(32),
+              Container(
+                padding: const EdgeInsets.all(48),
+                decoration: BoxDecoration(
+                  color: AppColors.neutral100,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.neutral200),
+                ),
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.my_location_outlined, size: 80, color: AppColors.neutral300),
-                      const SizedBox(height: 16),
-                      Text('还没有目标', style: TextStyle(color: AppColors.neutral500)),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: const Icon(Icons.menu_book_rounded, size: 64, color: AppColors.primary),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text('还没有目标', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.neutral800)),
+                      const SizedBox(height: 8),
+                      Text('创建一个目标开始打卡吧', style: TextStyle(fontSize: 14, color: AppColors.neutral500)),
                     ],
                   ),
                 ),
               )
             else
-              ..._goals.map((goal) => Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+              ..._goals.map((goal) {
+                final int totalDays = (goal['duration_days'] ?? 30);
+                final int currentDay = (goal['current_day'] ?? 0);
+                final double progress = totalDays > 0 ? currentDay / totalDays : 0.0;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.neutral200.withOpacity(0.6), width: 1),
+                    boxShadow: AppShadows.md,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.primaryContainer, AppColors.primary.withOpacity(0.15)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
+                          ),
+                          child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 28),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                goal['title'] ?? '未命名目标',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.neutral900, letterSpacing: -0.2),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.neutral150,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: Container(
+                                          width: MediaQuery.of(context).size.width * progress - 100,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryLight]),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    '${(progress * 100).toInt()}%',
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: () => _showCheckinDialog(goal),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Icon(Icons.check_circle_rounded, size: 22),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 24),
                   ),
-                  title: Text(goal['title'] ?? '未命名目标', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-                  subtitle: Text('第${goal['current_day'] ?? 0}天 / 共${goal['total_days'] ?? 0}天', style: TextStyle(color: AppColors.neutral600)),
-                  trailing: ElevatedButton(
-                    onPressed: () => _showCheckinDialog(goal),
-                    child: const Text('打卡'),
-                  ),
-                ),
-              )),
-            const SizedBox(height: 24),
+                );
+              }),
+            const SizedBox(height: 28),
             // 最近打卡记录
             if (_recentCheckins.isNotEmpty) ...[
-              Text('最近打卡', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
-              const SizedBox(height: 12),
-              ..._recentCheckins.map((checkin) => Card(
-                margin: const EdgeInsets.only(bottom: 8),
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.gradientTertiary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text('最近打卡', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ..._recentCheckins.map((checkin) => Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.neutral200.withOpacity(0.5), width: 1),
+                  boxShadow: AppShadows.sm,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
-                          color: AppColors.tertiary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          gradient: LinearGradient(colors: [AppColors.tertiaryContainer, Colors.white]),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.tertiary.withOpacity(0.2), width: 1.5),
                         ),
-                        child: Icon(
-                          Icons.check_circle,
-                          color: AppColors.tertiary,
-                        ),
+                        child: const Icon(Icons.check_circle_rounded, color: AppColors.tertiary, size: 26),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -3061,19 +3347,31 @@ class _CheckinScreenState extends State<CheckinScreen> {
                           children: [
                             Text(
                               checkin['notes'] ?? '打卡记录',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.neutral900),
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.neutral800, letterSpacing: -0.2),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              '心情：${'⭐' * (checkin['mood_rating'] ?? 0)}',
-                              style: TextStyle(color: AppColors.neutral600),
+                            Row(
+                              children: [
+                                ...(List.generate(checkin['mood_rating'] ?? 0, (i) => '⭐')),
+                                if ((checkin['mood_rating'] ?? 0) == 0)
+                                  Text('未评分', style: TextStyle(fontSize: 12, color: AppColors.neutral400)),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      Text(
-                        _formatDate(checkin['created_at']),
-                        style: TextStyle(color: AppColors.neutral500, fontSize: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppColors.neutral100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _formatDate(checkin['created_at']),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.neutral600),
+                        ),
                       ),
                     ],
                   ),
@@ -3180,73 +3478,123 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_goal?['title'] ?? '目标详情'),
+        title: Text(_goal?['title'] ?? '目标详情', style: const TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.3)),
         backgroundColor: Colors.transparent,
         foregroundColor: AppColors.primary,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
+            // 进度卡片 - 渐变背景
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: AppShadows.coloredPrimary,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '进度',
+                            style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.8), fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '第${_goal?['current_day'] ?? 0}天 / 共${_goal?['duration_days'] ?? 0}天',
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -0.3),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${(((_goal?['current_day'] ?? 0) / (_goal?['duration_days'] ?? 1)) * 100).toInt()}%',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: LinearProgressIndicator(
+                        value: ((_goal?['current_day'] ?? 0) / (_goal?['duration_days'] ?? 1)).toDouble(),
+                        backgroundColor: Colors.transparent,
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                        minHeight: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            // 今日任务卡片
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.gradientTertiary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text('今日任务', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.tertiaryContainer, Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.tertiary.withOpacity(0.2), width: 1.5),
+                boxShadow: AppShadows.md,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '第${_goal?['current_day'] ?? 0}天 / 共${_goal?['duration_days'] ?? 0}天',
-                          style: const TextStyle(fontSize: 14, color: AppColors.neutral500),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${(((_goal?['current_day'] ?? 0) / (_goal?['duration_days'] ?? 1)) * 100).toInt()}%',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: ((_goal?['current_day'] ?? 0) / (_goal?['duration_days'] ?? 1)).toDouble(),
-                        backgroundColor: AppColors.neutral200,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                        minHeight: 8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text('今日任务', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
-            const SizedBox(height: 12),
-            Card(
-              color: AppColors.cardBackground,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
                       children: [
                         Container(
-                          width: 48,
-                          height: 48,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
+                            gradient: LinearGradient(colors: [AppColors.tertiary, AppColors.tertiaryLight]),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: AppShadows.coloredTertiary,
                           ),
-                          child: const Icon(Icons.menu_book, color: AppColors.primary),
+                          child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 28),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -3255,28 +3603,46 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                             children: [
                               Text(
                                 _goal?['today_task'] ?? '暂无任务',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral900),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.neutral900, letterSpacing: -0.3),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '预计耗时：${_goal?['estimated_time'] ?? '40 分钟'}',
-                                style: const TextStyle(fontSize: 13, color: AppColors.neutral500),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(Icons.access_time_rounded, size: 14, color: AppColors.neutral500),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '预计：${_goal?['estimated_time'] ?? '40 分钟'}',
+                                    style: TextStyle(fontSize: 12, color: AppColors.neutral500, fontWeight: FontWeight.w500),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton.icon(
+                      height: 50,
+                      child: ElevatedButton(
                         onPressed: () => _showCheckinDialog(context),
-                        icon: const Icon(Icons.check_circle_outline),
-                        label: const Text('打卡完成'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.tertiary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle_rounded, size: 22),
+                            SizedBox(width: 10),
+                            Text('打卡完成', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: -0.3)),
+                          ],
                         ),
                       ),
                     ),
@@ -3284,14 +3650,57 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            const Text('任务列表', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.neutral700)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 28),
+            // 任务列表
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.gradientPrimary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text('任务列表', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
+              ],
+            ),
+            const SizedBox(height: 16),
             if (_tasks.isEmpty) ...[
-              _buildTaskItem(false, '暂无任务数据', 'AI 正在为你生成每日任务，请稍后刷新'),
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: AppColors.neutral100,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.neutral200),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.info.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.info_outline_rounded, color: AppColors.info, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('暂无任务数据', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.neutral800)),
+                          const SizedBox(height: 4),
+                          Text('AI 正在为你生成每日任务，请稍后刷新', style: TextStyle(fontSize: 13, color: AppColors.neutral500)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ] else ...[
-              for (var task in _tasks)
-                _buildTaskItemFromData(task),
+              for (var task in _tasks) _buildTaskItemFromData(task),
             ],
           ],
         ),
@@ -3329,33 +3738,107 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
   Widget _buildTaskItemFromData(dynamic task) {
     final bool completed = task['status'] == 'completed';
     final String title = task['title'] ?? '未命名任务';
-    final String meta = task['description'] ?? '';
+    final int dayNumber = task['day_number'] ?? 0;
+    final int? estimatedMinutes = task['estimated_minutes'];
+    final String description = task['description'] ?? '';
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: completed ? AppColors.success : AppColors.neutral300,
-            shape: BoxShape.circle,
-          ),
-          child: completed
-              ? const Icon(Icons.check, size: 16, color: Colors.white)
-              : null,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: completed ? AppColors.neutral200.withOpacity(0.5) : AppColors.neutral200, width: 1),
+        boxShadow: completed ? [] : AppShadows.sm,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 天数徽章
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: completed
+                      ? [AppColors.neutral300, AppColors.neutral400]
+                      : [AppColors.primary, AppColors.primaryLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: completed ? [] : AppShadows.coloredPrimary,
+              ),
+              child: Center(
+                child: completed
+                    ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                    : Text(
+                        'D$dayNumber',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            // 任务内容
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: completed ? AppColors.neutral400 : AppColors.neutral900,
+                      letterSpacing: -0.2,
+                      decoration: completed ? TextDecoration.lineThrough : null,
+                    ),
+                  ),
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: completed ? AppColors.neutral400 : AppColors.neutral600,
+                        height: 1.4,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (estimatedMinutes != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time_rounded, size: 12, color: completed ? AppColors.neutral400 : AppColors.neutral500),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${estimatedMinutes}分钟',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: completed ? AppColors.neutral400 : AppColors.neutral500,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-            decoration: completed ? TextDecoration.lineThrough : null,
-            color: completed ? AppColors.neutral400 : AppColors.neutral900,
-          ),
-        ),
-        subtitle: meta.isNotEmpty ? Text(meta, style: TextStyle(fontSize: 12, color: AppColors.neutral500)) : null,
       ),
     );
   }
+}
 
   void _showCheckinDialog(BuildContext context) {
     final notesController = TextEditingController();
