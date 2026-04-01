@@ -762,8 +762,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           end: Offset.zero,
                         ).animate(_slideAnimation),
                         child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           // Logo 区域
                           Container(
                             width: 64,
