@@ -678,6 +678,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
     return Scaffold(
       body: Container(
+        constraints: BoxConstraints(
+          minHeight: screenSize.height,
+        ),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -730,19 +733,35 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             // 主内容
             SafeArea(
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenSize.width > 400 ? 40 : 24,
-                    vertical: isLargeScreen ? 60 : 40,
+                child: Container(
+                  constraints: BoxConstraints(
+                    minHeight: screenSize.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
                   ),
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.15),
-                        end: Offset.zero,
-                      ).animate(_slideAnimation),
-                      child: Column(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primaryDark,
+                        Color(0xFF0D1F18),
+                      ],
+                      stops: [0.0, 0.6, 1.0],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenSize.width > 400 ? 40 : 24,
+                      vertical: isLargeScreen ? 60 : 40,
+                    ),
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.15),
+                          end: Offset.zero,
+                        ).animate(_slideAnimation),
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Logo 区域
@@ -985,7 +1004,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ),
                           // 底部填充 - 避免内容贴底
-                          SizedBox(height: isLargeScreen ? 60 : 40),
+                          SizedBox(height: isLargeScreen ? 80 : 40),
                         ],
                       ),
                     ),
@@ -3354,7 +3373,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                ...(List.generate(checkin['mood_rating'] ?? 0, (i) => '⭐')),
+                                ...(List.generate(checkin['mood_rating'] ?? 0, (i) => const Text('⭐', style: TextStyle(fontSize: 14)))),
                                 if ((checkin['mood_rating'] ?? 0) == 0)
                                   Text('未评分', style: TextStyle(fontSize: 12, color: AppColors.neutral400)),
                               ],
@@ -3838,7 +3857,6 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
       ),
     );
   }
-}
 
   void _showCheckinDialog(BuildContext context) {
     final notesController = TextEditingController();
