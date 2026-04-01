@@ -1012,6 +1012,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 ),
               ),
             ),
+            ),
             // 底部光效填充
             Positioned(
               bottom: 0,
