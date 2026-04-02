@@ -2302,6 +2302,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   int? _customDurationDays; // 自定义持续天数
   final GoalService _goalService = GoalService();
   bool _isCreating = false;
+  int _createStep = 0; // 0=未开始，1=生成 AI 计划中，2=创建目标中，3=完成
+  String _createMessage = '';
 
   final List<Map<String, String>> _templates = [
     {'icon': '📚', 'title': '30 天读 5 本书', 'goal': '30 天读 5 本书'},
@@ -2520,17 +2522,56 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             ].toList(),
           ),
           const SizedBox(height: 40),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton.icon(
-              onPressed: _isCreating ? null : _createGoal,
-              icon: _isCreating
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.auto_awesome),
-              label: Text(_isCreating ? '创建中...' : '生成计划', style: const TextStyle(fontSize: 18)),
+          // 分阶段进度指示器
+          if (_isCreating) ...[
+            Row(
+              children: [
+                _buildStepIndicator(1, '生成 AI 计划'),
+                const Expanded(child: SizedBox(height: 2)),
+                _buildStepIndicator(2, '创建目标'),
+                const Expanded(child: SizedBox(height: 2)),
+                _buildStepIndicator(3, '完成'),
+              ],
             ),
-          ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _createMessage,
+                      style: TextStyle(fontSize: 14, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+          ] else
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: _createGoal,
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('生成计划', style: TextStyle(fontSize: 18)),
+              ),
+            ),
         ],
       ),
     );
@@ -2540,6 +2581,49 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     return Text(
       title,
       style: TextStyle(fontSize: 14, color: AppColors.neutral600),
+    );
+  }
+
+  Widget _buildStepIndicator(int stepNum, String label) {
+    final isCompleted = _createStep >= stepNum;
+    final isCurrent = _createStep == stepNum;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isCompleted ? AppColors.primary : (isCurrent ? AppColors.primaryContainer : AppColors.neutral150),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isCompleted || isCurrent ? AppColors.primary : AppColors.neutral300,
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: isCompleted
+                ? const Icon(Icons.check, size: 18, color: Colors.white)
+                : Text(
+                    '$stepNum',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isCompleted || isCurrent ? AppColors.primary : AppColors.neutral500,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
+            color: isCurrent ? AppColors.primaryDark : AppColors.neutral600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -2637,7 +2721,11 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   }
 
   Future<void> _createGoal() async {
-    setState(() => _isCreating = true);
+    setState(() {
+      _isCreating = true;
+      _createStep = 1;
+      _createMessage = '正在生成 AI 计划，预计需要 5-10 秒...';
+    });
     try {
       // 1. 先调用 AI 生成计划
       Map<String, dynamic>? aiPlan;
@@ -2658,6 +2746,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         debugPrint('AI 计划生成失败：$e');
         aiPlan = null;
       }
+
+      // 进入下一步：创建目标
+      setState(() {
+        _createStep = 2;
+        _createMessage = '正在创建目标，同步 AI 生成的任务...';
+      });
 
       // 2. 创建目标（带上 AI 生成的任务）
       final startDate = DateTime.now();
@@ -2691,24 +2785,29 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
       debugPrint('【创建目标】后端返回：today_task=${result['today_task']}, current_day=${result['current_day']}');
 
-      if (mounted) {
-        setState(() => _isCreating = false);
+      // 进入完成步骤
+      setState(() {
+        _createStep = 3;
+        _createMessage = '目标创建完成！';
+      });
 
-        // 3. 展示 AI 生成的计划（如果有），用户关闭对话框后再关闭页面
-        if (aiPlan != null && (aiPlan.containsKey('daily_tasks') || aiPlan.containsKey('weekly_plans'))) {
-          _showAIPlanDialog(aiPlan);
-        } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('目标创建成功！')),
-            );
-          }
-          Navigator.pop(context, true);
+      // 3. 展示 AI 生成的计划（如果有），用户关闭对话框后再关闭页面
+      if (aiPlan != null && (aiPlan.containsKey('daily_tasks') || aiPlan.containsKey('weekly_plans'))) {
+        _showAIPlanDialog(aiPlan);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('目标创建成功！')),
+          );
         }
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isCreating = false);
+        setState(() {
+          _isCreating = false;
+          _createStep = 0;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_getFriendlyErrorMessage(e.toString()))),
         );
