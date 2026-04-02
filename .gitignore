@@ -73,3 +73,4 @@ android/**/GeneratedPluginRegistrant.kt
 
 # Claude Code
 .claude/
+.gstack/

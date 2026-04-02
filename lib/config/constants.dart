@@ -2,7 +2,7 @@
 class AppConfig {
   // 后端 API 地址
   // 本地开发环境（VSCode 远程/服务器转发）
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'http://localhost:8001';
 
   static const String apiPrefix = '/api/v1';
 
