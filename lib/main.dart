@@ -2292,8 +2292,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   int _step = 1;
   final TextEditingController _goalController = TextEditingController();
   String _selectedTime = '1 小时';
+  String _customTime = ''; // 自定义时间值
   String _selectedLevel = '零基础';
   int _selectedDurationDays = 30;
+  int? _customDurationDays; // 自定义持续天数
   final GoalService _goalService = GoalService();
   bool _isCreating = false;
 
@@ -2417,21 +2419,36 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: ['30 分钟', '1 小时', '2 小时', '灵活'].map((time) {
-              final isSelected = _selectedTime == time;
-              return ChoiceChip(
-                label: Text(time),
-                selected: isSelected,
+            children: [
+              ...['30 分钟', '1 小时', '2 小时', '灵活'].map((time) {
+                final isSelected = _selectedTime == time;
+                return ChoiceChip(
+                  label: Text(time),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) setState(() => _selectedTime = time);
+                  },
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : AppColors.neutral900,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                );
+              }),
+              // 自定义选项
+              ChoiceChip(
+                label: Text(_customTime.isNotEmpty ? _customTime : '自定义'),
+                selected: _selectedTime == 'custom',
                 onSelected: (selected) {
-                  if (selected) setState(() => _selectedTime = time);
+                  if (selected) _showCustomTimeDialog();
                 },
                 selectedColor: AppColors.primary,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.neutral900,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: _selectedTime == 'custom' ? Colors.white : AppColors.neutral900,
+                  fontWeight: _selectedTime == 'custom' ? FontWeight.bold : FontWeight.normal,
                 ),
-              );
-            }).toList(),
+              ),
+            ].toList(),
           ),
           const SizedBox(height: 24),
           _buildSectionTitle('你的经验水平：'),
@@ -2462,28 +2479,41 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              {'label': '7 天', 'days': 7},
-              {'label': '14 天', 'days': 14},
-              {'label': '30 天', 'days': 30},
-              {'label': '60 天', 'days': 60},
-              {'label': '90 天', 'days': 90},
-            ].map((option) {
-              final days = option['days'] as int;
-              final label = option['label'] as String;
-              final isSelected = _selectedDurationDays == days;
-              return ChoiceChip(
-                label: Text(label),
-                selected: isSelected,
+              ...[7, 14, 30, 60, 90].map((days) {
+                final label = '$days 天';
+                final isSelected = _selectedDurationDays == days && _customDurationDays == null;
+                return ChoiceChip(
+                  label: Text(label),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() {
+                        _selectedDurationDays = days;
+                        _customDurationDays = null;
+                      });
+                    }
+                  },
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : AppColors.neutral900,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                );
+              }),
+              // 自定义选项
+              ChoiceChip(
+                label: Text(_customDurationDays != null ? '$_customDurationDays 天' : '自定义'),
+                selected: _customDurationDays != null,
                 onSelected: (selected) {
-                  if (selected) setState(() => _selectedDurationDays = days);
+                  if (selected) _showCustomDurationDialog();
                 },
                 selectedColor: AppColors.primary,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.neutral900,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: _customDurationDays != null ? Colors.white : AppColors.neutral900,
+                  fontWeight: _customDurationDays != null ? FontWeight.bold : FontWeight.normal,
                 ),
-              );
-            }).toList(),
+              ),
+            ].toList(),
           ),
           const SizedBox(height: 40),
           SizedBox(
@@ -2506,6 +2536,99 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     return Text(
       title,
       style: TextStyle(fontSize: 14, color: AppColors.neutral600),
+    );
+  }
+
+  // 显示自定义时间对话框
+  void _showCustomTimeDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('输入每天可用时间'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: '如：45 分钟、1.5 小时、3 小时',
+          ),
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty) {
+              setState(() {
+                _customTime = value.trim();
+                _selectedTime = value.trim();
+              });
+              Navigator.pop(context);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                setState(() {
+                  _customTime = controller.text.trim();
+                  _selectedTime = controller.text.trim();
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 显示自定义持续时间对话框
+  void _showCustomDurationDialog() {
+    final controller = TextEditingController(text: _customDurationDays?.toString() ?? '');
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('输入目标持续天数'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            hintText: '如：21、45、120',
+          ),
+          onSubmitted: (value) {
+            final days = int.tryParse(value.trim());
+            if (days != null && days > 0) {
+              setState(() {
+                _customDurationDays = days;
+                _selectedDurationDays = days;
+              });
+              Navigator.pop(context);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final days = int.tryParse(controller.text.trim());
+              if (days != null && days > 0) {
+                setState(() {
+                  _customDurationDays = days;
+                  _selectedDurationDays = days;
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('确定'),
+          ),
+        ],
+      ),
     );
   }
 
