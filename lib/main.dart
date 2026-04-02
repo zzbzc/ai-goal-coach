@@ -1720,6 +1720,10 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
     setState(() => _isLoading = true);
     try {
       final goals = await _goalService.getGoals();
+      debugPrint('【加载目标】goals 数量：${goals.length}');
+      for (var goal in goals) {
+        debugPrint('  - 目标：${goal['title']}, today_task: ${goal['today_task']}, current_day: ${goal['current_day']}, duration_days: ${goal['duration_days']}');
+      }
       setState(() {
         _goals = goals;
         _hasGoals = goals.isNotEmpty;
@@ -2668,6 +2672,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           'description': task['description'] as String?,
           'estimated_minutes': task['estimated_minutes'] as int?,
         }).toList();
+        debugPrint('【创建目标】daily_tasks 数量：${dailyTasks.length}');
+        if (dailyTasks.isNotEmpty) {
+          debugPrint('【创建目标】第 1 天任务：${dailyTasks[0]['title']}');
+        }
       }
 
       final result = await _goalService.createGoal(
@@ -2680,6 +2688,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         experienceLevel: _selectedLevel,
         tasks: dailyTasks, // 传递 AI 生成的任务
       );
+
+      debugPrint('【创建目标】后端返回：today_task=${result['today_task']}, current_day=${result['current_day']}');
 
       if (mounted) {
         setState(() => _isCreating = false);
