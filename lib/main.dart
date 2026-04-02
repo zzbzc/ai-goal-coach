@@ -2340,31 +2340,108 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '你想达成什么目标？',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _goalController,
-            decoration: InputDecoration(
-              hintText: '请输入你的目标...',
-              hintStyle: TextStyle(color: AppColors.neutral400),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+          // 标题区域 - 渐变文字效果
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.primary, width: 2),
-              ),
-              contentPadding: const EdgeInsets.all(16),
+              borderRadius: BorderRadius.circular(8),
             ),
-            maxLines: 2,
+            child: const Text(
+              '你想达成什么目标？',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: -0.5,
+              ),
+            ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 8),
           Text(
-            '或者选择一个模板：',
-            style: TextStyle(fontSize: 14, color: AppColors.neutral600),
+            '好的开始是成功的一半，告诉我们你的目标',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.neutral600,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 28),
+          // 输入框 - 悬浮卡片效果
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _goalController,
+              decoration: InputDecoration(
+                hintText: '如：每天阅读 30 分钟、学会 Python 编程...',
+                hintStyle: TextStyle(
+                  color: AppColors.neutral400,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.all(20),
+                prefixIcon: Container(
+                  margin: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.edit_note, color: Colors.white, size: 22),
+                ),
+              ),
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppColors.neutral900,
+                height: 1.5,
+              ),
+              maxLines: 3,
+              minLines: 2,
+            ),
+          ),
+          const SizedBox(height: 36),
+          // 模板区域
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.tertiary, AppColors.primary],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '或者选择一个模板：',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.neutral700,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           ..._templates.map((template) => Padding(
@@ -2372,36 +2449,145 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             child: InkWell(
               onTap: () {
                 _goalController.text = template['goal']!;
+                // 添加微妙的触觉反馈
+                Feedback.forTap(context);
               },
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.neutral200),
-                ),
-                child: Row(
-                  children: [
-                    Text(template['icon']!, style: const TextStyle(fontSize: 28)),
-                    const SizedBox(width: 16),
-                    Text(
-                      template['title']!,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.neutral700),
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 200),
+                tween: Tween(begin: 1.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: child,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.neutral200.withOpacity(0.6),
+                      width: 1.5,
                     ),
-                    const Spacer(),
-                    Icon(Icons.chevron_right, color: AppColors.neutral400),
-                  ],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // 图标背景
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primaryContainer,
+                              AppColors.secondaryContainer.withOpacity(0.5),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Center(
+                          child: Text(
+                            template['icon']!,
+                            style: const TextStyle(fontSize: 26),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          template['title']!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.neutral800,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.add_circle_outline,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           )),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
-              onPressed: () => setState(() => _step = 2),
-              child: const Text('下一步', style: TextStyle(fontSize: 18)),
+          const SizedBox(height: 40),
+          // 主按钮 - 渐变背景 + 悬浮效果
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 300),
+            tween: Tween(begin: 1.0, end: 1.0),
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: child,
+              );
+            },
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: AppColors.gradientPrimary,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Feedback.forTap(context);
+                    setState(() => _step = 2);
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          '下一步',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white.withOpacity(0.9),
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -2415,172 +2601,433 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '你的基础情况：',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900),
+          // 返回按钮 + 标题
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => setState(() => _step = 1),
+                icon: Icon(Icons.arrow_back_ios_rounded, size: 18, color: AppColors.neutral600),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDark],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  '你的基础情况：',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          _buildSectionTitle('每天可用时间：'),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+          const SizedBox(height: 8),
+          Text(
+            '告诉我们你的情况，AI 将为你定制专属计划',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.neutral600,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 32),
+          // 第一部分：每天可用时间
+          _buildSettingSection(
+            icon: Icons.schedule,
+            title: '每天可用时间',
+            subtitle: '你每天能为这个目标投入多少时间？',
             children: [
               ...['30 分钟', '1 小时', '2 小时', '灵活'].map((time) {
                 final isSelected = _selectedTime == time;
-                return ChoiceChip(
-                  label: Text(time),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) setState(() => _selectedTime = time);
+                return _buildSelectableCard(
+                  label: time,
+                  isSelected: isSelected,
+                  onTap: () {
+                    Feedback.forTap(context);
+                    setState(() => _selectedTime = time);
                   },
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : AppColors.neutral900,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
+                  icon: _getTimeIcon(time),
                 );
               }),
               // 自定义选项
-              ChoiceChip(
-                label: Text(_customTime.isNotEmpty ? _customTime : '自定义'),
-                selected: _selectedTime == 'custom',
-                onSelected: (selected) {
-                  if (selected) _showCustomTimeDialog();
+              _buildSelectableCard(
+                label: _customTime.isNotEmpty ? _customTime : '自定义时间',
+                isSelected: _selectedTime == 'custom',
+                onTap: () {
+                  Feedback.forTap(context);
+                  _showCustomTimeDialog();
                 },
-                selectedColor: AppColors.primary,
-                labelStyle: TextStyle(
-                  color: _selectedTime == 'custom' ? Colors.white : AppColors.neutral900,
-                  fontWeight: _selectedTime == 'custom' ? FontWeight.bold : FontWeight.normal,
-                ),
+                icon: Icons.edit_calendar_rounded,
+                isCustom: true,
               ),
-            ].toList(),
+            ],
           ),
           const SizedBox(height: 24),
-          _buildSectionTitle('你的经验水平：'),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+          // 第二部分：经验水平
+          _buildSettingSection(
+            icon: Icons.psychology,
+            title: '你的经验水平',
+            subtitle: '你在这个领域的基础如何？',
             children: ['零基础', '有一些基础', '中级', '高级'].map((level) {
               final isSelected = _selectedLevel == level;
-              return ChoiceChip(
-                label: Text(level),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) setState(() => _selectedLevel = level);
+              return _buildSelectableCard(
+                label: level,
+                isSelected: isSelected,
+                onTap: () {
+                  Feedback.forTap(context);
+                  setState(() => _selectedLevel = level);
                 },
-                selectedColor: AppColors.primary,
-                labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.neutral900,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
+                icon: _getLevelIcon(level),
               );
             }).toList(),
           ),
           const SizedBox(height: 24),
-          _buildSectionTitle('目标持续时间：'),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+          // 第三部分：目标持续时间
+          _buildSettingSection(
+            icon: Icons.timer,
+            title: '目标持续时间',
+            subtitle: '你希望用多长时间达成这个目标？',
             children: [
               ...[7, 14, 30, 60, 90].map((days) {
                 final label = '$days 天';
                 final isSelected = _selectedDurationDays == days && _customDurationDays == null;
-                return ChoiceChip(
-                  label: Text(label),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _selectedDurationDays = days;
-                        _customDurationDays = null;
-                      });
-                    }
+                return _buildSelectableCard(
+                  label: label,
+                  isSelected: isSelected,
+                  onTap: () {
+                    Feedback.forTap(context);
+                    setState(() {
+                      _selectedDurationDays = days;
+                      _customDurationDays = null;
+                    });
                   },
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : AppColors.neutral900,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
+                  icon: _getDurationIcon(days),
                 );
               }),
               // 自定义选项
-              ChoiceChip(
-                label: Text(_customDurationDays != null ? '$_customDurationDays 天' : '自定义'),
-                selected: _customDurationDays != null,
-                onSelected: (selected) {
-                  if (selected) _showCustomDurationDialog();
+              _buildSelectableCard(
+                label: _customDurationDays != null ? '$_customDurationDays 天' : '自定义时长',
+                isSelected: _customDurationDays != null,
+                onTap: () {
+                  Feedback.forTap(context);
+                  _showCustomDurationDialog();
                 },
-                selectedColor: AppColors.primary,
-                labelStyle: TextStyle(
-                  color: _customDurationDays != null ? Colors.white : AppColors.neutral900,
-                  fontWeight: _customDurationDays != null ? FontWeight.bold : FontWeight.normal,
-                ),
+                icon: Icons.edit_calendar_rounded,
+                isCustom: true,
               ),
-            ].toList(),
+            ],
           ),
           const SizedBox(height: 40),
-          // 分阶段进度指示器
-          if (_isCreating) ...[
-            Row(
-              children: [
-                _buildStepIndicator(1, '生成 AI 计划'),
-                const Expanded(child: SizedBox(height: 2)),
-                _buildStepIndicator(2, '创建目标'),
-                const Expanded(child: SizedBox(height: 2)),
-                _buildStepIndicator(3, '完成'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.primaryContainer.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+          // 生成计划按钮
+          if (!_isCreating)
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 300),
+              tween: Tween(begin: 1.0, end: 1.0),
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: child,
+                );
+              },
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.tertiary, AppColors.tertiaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.tertiary.withOpacity(0.35),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      Feedback.forTap(context);
+                      _createGoal();
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 22),
+                          const SizedBox(width: 10),
+                          const Text(
+                            '生成 AI 计划',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _createMessage,
-                      style: TextStyle(fontSize: 14, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-          ] else
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: _createGoal,
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('生成计划', style: TextStyle(fontSize: 18)),
-              ),
-            ),
+            )
+          else
+            _buildLoadingState(),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(fontSize: 14, color: AppColors.neutral600),
+  /// 构建设置区域
+  Widget _buildSettingSection({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.neutral200.withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primaryContainer, AppColors.secondaryContainer],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.neutral800,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.neutral500,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(spacing: 10, runSpacing: 10, children: children),
+        ],
+      ),
+    );
+  }
+
+  /// 构建可选卡片
+  Widget _buildSelectableCard({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required IconData icon,
+    bool isCustom = false,
+  }) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 150),
+      tween: Tween(begin: 1.0, end: isSelected ? 1.02 : 1.0),
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: child,
+        );
+      },
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : AppColors.neutral50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.neutral200,
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected ? Colors.white : AppColors.neutral600,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? Colors.white : AppColors.neutral700,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getTimeIcon(String time) {
+    switch (time) {
+      case '30 分钟':
+        return Icons.access_time_rounded;
+      case '1 小时':
+        return Icons.hourglass_bottom_rounded;
+      case '2 小时':
+        return Icons.hourglass_top_rounded;
+      case '灵活':
+        return Icons.schedule_rounded;
+      default:
+        return Icons.schedule;
+    }
+  }
+
+  IconData _getLevelIcon(String level) {
+    switch (level) {
+      case '零基础':
+        return Icons.auto_graph_rounded;
+      case '有一些基础':
+        return Icons.trending_up_rounded;
+      case '中级':
+        return Icons.show_chart_rounded;
+      case '高级':
+        return Icons.auto_stories_rounded;
+      default:
+        return Icons.self_improvement_rounded;
+    }
+  }
+
+  IconData _getDurationIcon(int days) {
+    if (days <= 7) return Icons.calendar_today_rounded;
+    if (days <= 14) return Icons.calendar_month_rounded;
+    if (days <= 30) return Icons.date_range_rounded;
+    return Icons.calendar_view_month_rounded;
+  }
+
+  Widget _buildLoadingState() {
+    return Column(
+      children: [
+        // 分阶段进度指示器
+        Row(
+          children: [
+            _buildStepIndicator(1, '分析'),
+            const Expanded(
+              child: SizedBox(
+                height: 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: AppColors.neutral200),
+                ),
+              ),
+            ),
+            _buildStepIndicator(2, '规划'),
+            const Expanded(
+              child: SizedBox(
+                height: 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: AppColors.neutral200),
+                ),
+              ),
+            ),
+            _buildStepIndicator(3, '完成'),
+          ],
+        ),
+        const SizedBox(height: 20),
+        // 加载消息
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primaryContainer.withOpacity(0.5),
+                AppColors.secondaryContainer.withOpacity(0.3),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  _createMessage,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -2591,36 +3038,49 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
-            color: isCompleted ? AppColors.primary : (isCurrent ? AppColors.primaryContainer : AppColors.neutral150),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isCompleted || isCurrent ? AppColors.primary : AppColors.neutral300,
-              width: 2,
-            ),
+            gradient: isCompleted || isCurrent
+                ? LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isCompleted || isCurrent ? null : AppColors.neutral150,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: isCompleted || isCurrent
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: isCompleted
-                ? const Icon(Icons.check, size: 18, color: Colors.white)
+                ? const Icon(Icons.check_rounded, size: 20, color: Colors.white)
                 : Text(
                     '$stepNum',
                     style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isCompleted || isCurrent ? AppColors.primary : AppColors.neutral500,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: isCompleted || isCurrent ? Colors.white : AppColors.neutral500,
                     ),
                   ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Text(
           label,
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
-            color: isCurrent ? AppColors.primaryDark : AppColors.neutral600,
+            fontSize: 14,
+            fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+            color: isCurrent ? AppColors.primaryDark : AppColors.neutral500,
+            letterSpacing: -0.3,
           ),
         ),
       ],
@@ -2632,42 +3092,128 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('输入每天可用时间'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: '如：45 分钟、1.5 小时、3 小时',
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 8,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(20),
           ),
-          onSubmitted: (value) {
-            if (value.trim().isNotEmpty) {
-              setState(() {
-                _customTime = value.trim();
-                _selectedTime = value.trim();
-              });
-              Navigator.pop(context);
-            }
-          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.primaryContainer, AppColors.secondaryContainer],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.schedule, color: AppColors.primary, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    '输入每天可用时间',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.neutral900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.neutral900,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  hintText: '如：45 分钟、1.5 小时、3 小时',
+                  hintStyle: TextStyle(color: AppColors.neutral400, fontSize: 15),
+                  filled: true,
+                  fillColor: AppColors.neutral50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  prefixIcon: Icon(Icons.edit_calendar, color: AppColors.neutral500),
+                ),
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    setState(() {
+                      _customTime = value.trim();
+                      _selectedTime = value.trim();
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: AppColors.neutral100,
+                      ),
+                      child: Text(
+                        '取消',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.neutral600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (controller.text.trim().isNotEmpty) {
+                          setState(() {
+                            _customTime = controller.text.trim();
+                            _selectedTime = controller.text.trim();
+                          });
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                        shadowColor: AppColors.primary.withOpacity(0.3),
+                      ),
+                      child: const Text(
+                        '确定',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                setState(() {
-                  _customTime = controller.text.trim();
-                  _selectedTime = controller.text.trim();
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('确定'),
-          ),
-        ],
       ),
     );
   }
@@ -2677,45 +3223,131 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     final controller = TextEditingController(text: _customDurationDays?.toString() ?? '');
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('输入目标持续天数'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            hintText: '如：21、45、120',
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 8,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(20),
           ),
-          onSubmitted: (value) {
-            final days = int.tryParse(value.trim());
-            if (days != null && days > 0) {
-              setState(() {
-                _customDurationDays = days;
-                _selectedDurationDays = days;
-              });
-              Navigator.pop(context);
-            }
-          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.primaryContainer, AppColors.secondaryContainer],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.calendar_today, color: AppColors.primary, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    '输入目标持续天数',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.neutral900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: AppColors.neutral900,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  hintText: '如：21、45、120',
+                  hintStyle: TextStyle(color: AppColors.neutral400, fontSize: 15),
+                  filled: true,
+                  fillColor: AppColors.neutral50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  prefixIcon: Icon(Icons.calendar_month, color: AppColors.neutral500),
+                ),
+                onSubmitted: (value) {
+                  final days = int.tryParse(value.trim());
+                  if (days != null && days > 0) {
+                    setState(() {
+                      _customDurationDays = days;
+                      _selectedDurationDays = days;
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: AppColors.neutral100,
+                      ),
+                      child: Text(
+                        '取消',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.neutral600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final days = int.tryParse(controller.text.trim());
+                        if (days != null && days > 0) {
+                          setState(() {
+                            _customDurationDays = days;
+                            _selectedDurationDays = days;
+                          });
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                        shadowColor: AppColors.primary.withOpacity(0.3),
+                      ),
+                      child: const Text(
+                        '确定',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final days = int.tryParse(controller.text.trim());
-              if (days != null && days > 0) {
-                setState(() {
-                  _customDurationDays = days;
-                  _selectedDurationDays = days;
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('确定'),
-          ),
-        ],
       ),
     );
   }
