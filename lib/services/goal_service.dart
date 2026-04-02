@@ -38,12 +38,20 @@ class GoalService {
     // 如果有任务，添加到请求中
     if (tasks != null && tasks.isNotEmpty) {
       data['tasks'] = tasks.map((task) => {
-        'day_number': task['day_number'],
-        'title': task['title'],
-        'description': task['description'],
-        'estimated_minutes': task['estimated_minutes'],
+        'day_number': task['day_number'] is int
+            ? task['day_number'] as int
+            : int.tryParse(task['day_number'].toString()) ?? 1,
+        'title': task['title']?.toString() ?? '',
+        'description': task['description']?.toString(),
+        'estimated_minutes': task['estimated_minutes'] is int
+            ? task['estimated_minutes'] as int
+            : (task['estimated_minutes'] != null
+                ? int.tryParse(task['estimated_minutes'].toString())
+                : null),
       }).toList();
+      print('[GoalService] 发送的 tasks 数据：${data['tasks']}');
     }
+    print('[GoalService] 发送的创建目标数据：$data');
     return await _http.post(AppConfig.goalsUrl, data);
   }
 
