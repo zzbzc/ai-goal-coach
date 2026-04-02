@@ -2560,9 +2560,8 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
       if (mounted) {
         setState(() => _isCreating = false);
-        Navigator.pop(context, true);
 
-        // 3. 展示 AI 生成的计划（如果有）
+        // 3. 展示 AI 生成的计划（如果有），用户关闭对话框后再关闭页面
         if (aiPlan != null && (aiPlan.containsKey('daily_tasks') || aiPlan.containsKey('weekly_plans'))) {
           _showAIPlanDialog(aiPlan);
         } else {
@@ -2571,6 +2570,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
               const SnackBar(content: Text('目标创建成功！')),
             );
           }
+          Navigator.pop(context, true);
         }
       }
     } catch (e) {
@@ -2913,7 +2913,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context); // 关闭 AI 计划对话框
+                      Navigator.pop(context, true); // 关闭创建页面并返回 true
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.tertiary,
                       foregroundColor: Colors.white,
