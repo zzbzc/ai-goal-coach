@@ -3195,7 +3195,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     try {
-                      await _checkinService.createCheckin(
+                      final result = await _checkinService.createCheckin(
                         goalId: goal['id'],
                         notes: notesController.text.isNotEmpty ? notesController.text : null,
                         moodRating: moodRating,
@@ -3205,6 +3205,19 @@ class _CheckinScreenState extends State<CheckinScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('打卡成功！')),
                         );
+                        // 从后端返回的数据中获取更新后的 goal 信息
+                        if (result.containsKey('goal') && result['goal'] != null) {
+                          final updatedGoal = result['goal'] as Map<String, dynamic>;
+                          debugPrint('【打卡后更新】goal_id=${updatedGoal['id']}, current_day=${updatedGoal['current_day']}, today_task=${updatedGoal['today_task']}');
+                          // 更新本地 goal 数据中的 today_task 和 current_day
+                          setState(() {
+                            final index = _goals.indexWhere((g) => g['id'] == goal['id']);
+                            if (index >= 0) {
+                              _goals[index]['current_day'] = updatedGoal['current_day'];
+                              _goals[index]['today_task'] = updatedGoal['today_task'];
+                            }
+                          });
+                        }
                         _loadData();
                       }
                     } catch (e) {
@@ -4028,7 +4041,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     try {
-                      await _checkinService.createCheckin(
+                      final result = await _checkinService.createCheckin(
                         goalId: widget.goalId,
                         notes: notesController.text.isNotEmpty ? notesController.text : null,
                       );
@@ -4037,6 +4050,16 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('打卡成功！')),
                         );
+                        // 从后端返回的数据中获取更新后的 goal 信息
+                        if (result.containsKey('goal') && result['goal'] != null) {
+                          final updatedGoal = result['goal'] as Map<String, dynamic>;
+                          debugPrint('【打卡后更新】goal_id=${updatedGoal['id']}, current_day=${updatedGoal['current_day']}, today_task=${updatedGoal['today_task']}');
+                          // 更新本地 _goal 数据
+                          setState(() {
+                            _goal?['current_day'] = updatedGoal['current_day'];
+                            _goal?['today_task'] = updatedGoal['today_task'];
+                          });
+                        }
                         _loadGoalData(); // 刷新页面数据
                       }
                     } catch (e) {
