@@ -2141,20 +2141,19 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * progress - 60,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.primaryLight],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
+                  child: FractionallySizedBox(
+                    widthFactor: progress,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryLight],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -3277,11 +3276,14 @@ class _CheckinScreenState extends State<CheckinScreen> {
                                       ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(4),
-                                        child: Container(
-                                          width: MediaQuery.of(context).size.width * progress - 100,
-                                          height: 8,
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryLight]),
+                                        child: FractionallySizedBox(
+                                          widthFactor: progress,
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                            height: 8,
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryLight]),
+                                            ),
                                           ),
                                         ),
                                       ),
