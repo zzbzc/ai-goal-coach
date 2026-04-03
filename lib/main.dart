@@ -1165,7 +1165,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   // 验证码状态
   bool _verificationCodeSent = false;
   bool _isSendingCode = false;
-  int _countdownSeconds = 60;
+  int _countdownSeconds = 120;
+  bool _canResend = false;
+  Timer? _countdownTimer;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
@@ -1206,7 +1208,24 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     _usernameFocusNode.dispose();
     _passwordFocusNode.dispose();
     _verificationCodeFocusNode.dispose();
+    _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdownSeconds > 0) {
+        setState(() {
+          _countdownSeconds--;
+        });
+      } else {
+        setState(() {
+          _canResend = true;
+        });
+        timer.cancel();
+      }
+    });
   }
 
   Future<void> _handleSendVerificationCode() async {
@@ -1233,19 +1252,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       setState(() {
         _verificationCodeSent = true;
         _isSendingCode = false;
-        _countdownSeconds = 60;
+        _countdownSeconds = 120;
+        _canResend = false;
       });
 
       // 开始倒计时
-      Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_countdownSeconds > 0) {
-          setState(() {
-            _countdownSeconds--;
-          });
-        } else {
-          timer.cancel();
-        }
-      });
+      _startCountdown();
 
       // 自动聚焦到验证码字段
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -1272,6 +1284,17 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           _errorMessage = e.toString();
         });
       }
+    }
+  }
+
+  Future<void> _handleResendVerificationCode() async {
+    if (_canResend) {
+      // 重置验证码状态，让用户可以重新输入
+      setState(() {
+        _verificationCodeSent = false;
+      });
+      // 重新发送
+      await _handleSendVerificationCode();
     }
   }
 
@@ -1519,27 +1542,81 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     hint: 'your@email.com',
                                     icon: Icons.email_outlined,
                                     keyboardType: TextInputType.emailAddress,
-                                    suffixAction: _verificationCodeSent
-                                        ? null
-                                        : () => _handleSendVerificationCode(),
+                                    suffixAction: (!_verificationCodeSent || _canResend)
+                                        ? () => _handleSendVerificationCode()
+                                        : null,
                                     suffixActionLabel: _isSendingCode
                                         ? '发送中...'
-                                        : _verificationCodeSent
-                                            ? '已发送'
-                                            : '获取验证码',
-                                    suffixActionDisabled: _isSendingCode || _verificationCodeSent,
+                                        : _canResend
+                                            ? '重新发送'
+                                            : '已发送',
+                                    suffixActionDisabled: _isSendingCode || (!_canResend && _verificationCodeSent),
                                   ),
                                   const SizedBox(height: 16),
                                   // 验证码字段（渐进式显示）
                                   if (_verificationCodeSent) ...[
-                                    _buildRegisterTextField(
-                                      controller: _verificationCodeController,
-                                      focusNode: _verificationCodeFocusNode,
-                                      label: '验证码',
-                                      hint: '输入 6 位验证码',
-                                      icon: Icons.shield_outlined,
-                                      keyboardType: TextInputType.number,
-                                      maxLength: 6,
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 5,
+                                          child: _buildRegisterTextField(
+                                            controller: _verificationCodeController,
+                                            focusNode: _verificationCodeFocusNode,
+                                            label: '验证码',
+                                            hint: '6 位数字',
+                                            icon: Icons.shield_outlined,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 6,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        // 重新发送按钮（倒计时结束后显示）
+                                        Expanded(
+                                          flex: 3,
+                                          child: Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              color: _canResend
+                                                  ? AppColors.primary
+                                                  : AppColors.neutral100,
+                                              borderRadius: BorderRadius.circular(14),
+                                            ),
+                                            child: Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                onTap: _canResend
+                                                    ? () => _handleResendVerificationCode()
+                                                    : null,
+                                                borderRadius: BorderRadius.circular(14),
+                                                child: Center(
+                                                  child: _isSendingCode
+                                                      ? const SizedBox(
+                                                          width: 18,
+                                                          height: 18,
+                                                          child: CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                            valueColor:
+                                                                AlwaysStoppedAnimation<Color>(Colors.white),
+                                                          ),
+                                                        )
+                                                      : Text(
+                                                          _canResend
+                                                              ? '重新发送'
+                                                              : '${_countdownSeconds}s 后重发',
+                                                          style: TextStyle(
+                                                            color: _canResend
+                                                                ? Colors.white
+                                                                : AppColors.neutral400,
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     const SizedBox(height: 16),
                                   ],
