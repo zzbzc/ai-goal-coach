@@ -1685,9 +1685,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: TextFormField(
             controller: controller,
@@ -1696,26 +1695,26 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             maxLength: maxLength,
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.white,
+              color: AppColors.neutral900,
               height: 1.5,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.45),
+                color: AppColors.neutral400,
                 fontSize: 15,
               ),
               prefixIcon: Padding(
                 padding: const EdgeInsets.only(left: 16, right: 12),
-                child: Icon(icon, color: Colors.white.withOpacity(0.7), size: 20),
+                child: Icon(icon, color: AppColors.neutral500, size: 20),
               ),
               suffixIcon: suffixAction != null
                   ? Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Material(
                         color: suffixActionDisabled
-                            ? Colors.white.withOpacity(0.08)
-                            : AppColors.secondary.withOpacity(0.25),
+                            ? AppColors.neutral100
+                            : AppColors.primaryContainer,
                         borderRadius: BorderRadius.circular(10),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
@@ -1726,8 +1725,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                               suffixActionLabel ?? '',
                               style: TextStyle(
                                 color: suffixActionDisabled
-                                    ? Colors.white.withOpacity(0.35)
-                                    : AppColors.secondary,
+                                    ? AppColors.neutral400
+                                    : AppColors.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.2,
@@ -1771,9 +1770,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: TextFormField(
             controller: controller,
@@ -1781,23 +1779,23 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             obscureText: obscureText,
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.white,
+              color: AppColors.neutral900,
               height: 1.5,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.45),
+                color: AppColors.neutral400,
                 fontSize: 15,
               ),
               prefixIcon: Padding(
                 padding: const EdgeInsets.only(left: 16, right: 12),
-                child: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.7), size: 20),
+                child: Icon(Icons.lock_outlined, color: AppColors.neutral500, size: 20),
               ),
               suffixIcon: IconButton(
                 icon: Icon(
                   obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: Colors.white.withOpacity(0.7),
+                  color: AppColors.neutral500,
                   size: 20,
                 ),
                 onPressed: onToggleObscure,
