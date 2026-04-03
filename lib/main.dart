@@ -1287,17 +1287,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     }
   }
 
-  Future<void> _handleResendVerificationCode() async {
-    if (_canResend) {
-      // 重置验证码状态，让用户可以重新输入
-      setState(() {
-        _verificationCodeSent = false;
-      });
-      // 重新发送
-      await _handleSendVerificationCode();
-    }
-  }
-
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -1542,6 +1531,25 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     hint: 'your@email.com',
                                     icon: Icons.email_outlined,
                                     keyboardType: TextInputType.emailAddress,
+                                    suffixAction: _canResend || !_verificationCodeSent
+                                        ? () => _handleSendVerificationCode()
+                                        : null,
+                                    suffixActionLabel: _isSendingCode
+                                        ? '发送中...'
+                                        : _canResend
+                                            ? '重新发送'
+                                            : '已发送',
+                                    suffixActionDisabled: _isSendingCode,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // 验证码字段
+                                  _buildRegisterTextField(
+                                    controller: _verificationCodeController,
+                                    focusNode: _verificationCodeFocusNode,
+                                    label: '验证码',
+                                    hint: '输入 6 位验证码',
+                                    icon: Icons.shield_outlined,
+                                    keyboardType: TextInputType.number,
                                     suffixAction: (!_verificationCodeSent || _canResend)
                                         ? () => _handleSendVerificationCode()
                                         : null,
@@ -1553,73 +1561,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     suffixActionDisabled: _isSendingCode || (!_canResend && _verificationCodeSent),
                                   ),
                                   const SizedBox(height: 16),
-                                  // 验证码字段（渐进式显示）
-                                  if (_verificationCodeSent) ...[
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 5,
-                                          child: _buildRegisterTextField(
-                                            controller: _verificationCodeController,
-                                            focusNode: _verificationCodeFocusNode,
-                                            label: '验证码',
-                                            hint: '6 位数字',
-                                            icon: Icons.shield_outlined,
-                                            keyboardType: TextInputType.number,
-                                            maxLength: 6,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        // 重新发送按钮（倒计时结束后显示）
-                                        Expanded(
-                                          flex: 3,
-                                          child: Container(
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              color: _canResend
-                                                  ? AppColors.primary
-                                                  : AppColors.neutral100,
-                                              borderRadius: BorderRadius.circular(14),
-                                            ),
-                                            child: Material(
-                                              color: Colors.transparent,
-                                              child: InkWell(
-                                                onTap: _canResend
-                                                    ? () => _handleResendVerificationCode()
-                                                    : null,
-                                                borderRadius: BorderRadius.circular(14),
-                                                child: Center(
-                                                  child: _isSendingCode
-                                                      ? const SizedBox(
-                                                          width: 18,
-                                                          height: 18,
-                                                          child: CircularProgressIndicator(
-                                                            strokeWidth: 2,
-                                                            valueColor:
-                                                                AlwaysStoppedAnimation<Color>(Colors.white),
-                                                          ),
-                                                        )
-                                                      : Text(
-                                                          _canResend
-                                                              ? '重新发送'
-                                                              : '${_countdownSeconds}s 后重发',
-                                                          style: TextStyle(
-                                                            color: _canResend
-                                                                ? Colors.white
-                                                                : AppColors.neutral400,
-                                                            fontSize: 12,
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                  ],
                                   // 用户名字段
                                   _buildRegisterTextField(
                                     controller: _usernameController,
