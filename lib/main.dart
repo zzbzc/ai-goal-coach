@@ -752,7 +752,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: screenSize.width > 400 ? 40 : 24,
-                      vertical: isLargeScreen ? 60 : 40,
+                      vertical: isLargeScreen ? 40 : 24,
                     ),
                     child: FadeTransition(
                       opacity: _fadeAnimation,
