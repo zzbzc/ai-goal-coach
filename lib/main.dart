@@ -5098,73 +5098,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.neutral50,
+      backgroundColor: AppColors.primary,
       body: CustomScrollView(
         slivers: [
-          // 渐变头部 - 增加高度让卡片上移 overlap
-          SliverAppBar(
-            expandedHeight: 200,
-            floating: false,
-            pinned: true,
-            backgroundColor: Colors.transparent,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primaryDark,
-                      AppColors.primary.withOpacity(0.8),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                ),
-              ),
-              collapseMode: CollapseMode.pin,
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
-                onPressed: _handleLogout,
-                tooltip: '登出',
-              ),
-            ],
-          ),
-          // 内容区域 - 使用负 margin 让卡片上移
+          // 用户信息卡片 - 直接放在顶部，无渐变头部
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 80),
-              child: Column(
-                children: [
-                  // 用户信息卡片 - 上移重叠到渐变区域
-                  _buildAnimatedCard(
-                    index: 0,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: AppColors.cardBackground,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                      child: Row(
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
                         children: [
                           // 头像
                           Container(
-                            width: 80,
-                            height: 80,
+                            width: 70,
+                            height: 70,
                             decoration: BoxDecoration(
                               gradient: AppColors.gradientTertiary,
-                              borderRadius: BorderRadius.circular(40),
-                              border: Border.all(color: Colors.white, width: 4),
+                              borderRadius: BorderRadius.circular(35),
                               boxShadow: [
                                 BoxShadow(
                                   color: AppColors.tertiary.withOpacity(0.3),
@@ -5175,9 +5140,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             child: _user?['avatar_url'] != null
                                 ? ClipOval(child: Image.network(_user!['avatar_url']!, fit: BoxFit.cover))
-                                : const Icon(Icons.person, size: 40, color: Colors.white),
+                                : const Icon(Icons.person, size: 35, color: Colors.white),
                           ),
-                          const SizedBox(width: 20),
+                          const SizedBox(width: 16),
                           // 用户信息
                           Expanded(
                             child: Column(
@@ -5186,7 +5151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Text(
                                   _user?['username'] ?? '用户名',
                                   style: const TextStyle(
-                                    fontSize: 22,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.neutral900,
                                     letterSpacing: -0.5,
@@ -5203,92 +5168,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryContainer,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.local_fire_department_rounded, size: 14, color: AppColors.primary),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '连续 $_streakCount 天',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.primaryDark,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
                           ),
+                          // 退出按钮
+                          IconButton(
+                            icon: const Icon(Icons.logout, color: AppColors.neutral400),
+                            onPressed: _handleLogout,
+                            tooltip: '登出',
+                          ),
                         ],
                       ),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                // 统计数据
-                _buildAnimatedCard(
-                  index: 1,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.cardBackground, AppColors.cardBackgroundAlt],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                      const SizedBox(height: 20),
+                      // 连续打卡徽章
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.local_fire_department_rounded, size: 20, color: AppColors.primary),
+                            const SizedBox(width: 8),
+                            Text(
+                              '连续 $_streakCount 天',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryDark,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.neutral200.withOpacity(0.6)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatCard('🔥', '$_streakCount', '连续打卡', 0),
-                        Container(width: 1, height: 50, color: AppColors.neutral200),
-                        _buildStatCard('✅', '$_totalCheckins', '累计打卡', 1),
-                        Container(width: 1, height: 50, color: AppColors.neutral200),
-                        _buildStatCard('🎯', '$_completedGoals', '完成目标', 2),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                // 设置选项
-                _buildAnimatedCard(
-                  index: 2,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBackground,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.neutral200.withOpacity(0.6)),
-                      boxShadow: AppShadows.md,
-                    ),
-                    child: Column(
-                      children: [
-                        _buildSettingItem(Icons.notifications_outlined, '消息通知', '开启每日提醒', Icons.chevron_right),
-                        Divider(height: 1, indent: 60, color: AppColors.neutral150),
-                        _buildSettingItem(Icons.schedule_rounded, '打卡时间', '设置提醒时间', Icons.chevron_right),
-                        Divider(height: 1, indent: 60, color: AppColors.neutral150),
-                        _buildSettingItem(Icons.info_outline, '关于我们', '版本 1.0.0', Icons.chevron_right),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
           ),
-        ),
+          // 统计数据卡片
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: _buildAnimatedCard(
+                index: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: AppShadows.md,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatCard('🔥', '$_streakCount', '连续打卡', 0),
+                      Container(width: 1, height: 50, color: AppColors.neutral200),
+                      _buildStatCard('✅', '$_totalCheckins', '累计打卡', 1),
+                      Container(width: 1, height: 50, color: AppColors.neutral200),
+                      _buildStatCard('🎯', '$_completedGoals', '完成目标', 2),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 设置选项
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: _buildAnimatedCard(
+                index: 2,
+                child: Container(
+                  padding: const EdgeInsets.all(0),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: AppShadows.md,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSettingItem(Icons.notifications_outlined, '消息通知', '开启每日提醒', Icons.chevron_right),
+                      Divider(height: 1, indent: 60, color: AppColors.neutral150),
+                      _buildSettingItem(Icons.schedule_rounded, '打卡时间', '设置提醒时间', Icons.chevron_right),
+                      Divider(height: 1, indent: 60, color: AppColors.neutral150),
+                      _buildSettingItem(Icons.info_outline, '关于我们', '版本 1.0.0', Icons.chevron_right),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 40),
+          ),
         ],
       ),
     );
