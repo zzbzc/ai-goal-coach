@@ -5,19 +5,39 @@ import 'http_service.dart';
 class AuthService {
   final HttpService _http = HttpService();
 
+  /// 发送验证码
+  Future<void> sendVerificationCode(String email) async {
+    await _http.post(AppConfig.sendVerificationCodeUrl, {
+      'email': email,
+    });
+  }
+
+  /// 验证邮箱
+  Future<void> verifyEmail(String email, String code) async {
+    await _http.post(AppConfig.verifyEmailUrl, {
+      'email': email,
+      'verification_code': code,
+    });
+  }
+
   /// 用户注册
   Future<Map<String, dynamic>> register({
     required String email,
     required String username,
     required String password,
+    String? verificationCode,
   }) async {
-    final data = await _http.post(AppConfig.registerUrl, {
+    final Map<String, dynamic> data = {
       'email': email,
       'username': username,
       'password': password,
-    });
-    await _http.setTokens(data['access_token'], data['refresh_token']);
-    return data;
+    };
+    if (verificationCode != null && verificationCode.isNotEmpty) {
+      data['verification_code'] = verificationCode;
+    }
+    final result = await _http.post(AppConfig.registerUrl, data);
+    await _http.setTokens(result['access_token'], result['refresh_token']);
+    return result;
   }
 
   /// 用户登录

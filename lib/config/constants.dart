@@ -11,6 +11,8 @@ class AppConfig {
   static String get loginUrl => '$baseUrl$apiPrefix/auth/login';
   static String get refreshTokenUrl => '$baseUrl$apiPrefix/auth/refresh';
   static String get userProfileUrl => '$baseUrl$apiPrefix/auth/me';
+  static String get sendVerificationCodeUrl => '$baseUrl$apiPrefix/auth/send-verification-code';
+  static String get verifyEmailUrl => '$baseUrl$apiPrefix/auth/verify-email';
 
   static String get goalsUrl => '$baseUrl$apiPrefix/goals';
   static String get checkinsUrl => '$baseUrl$apiPrefix/checkins';
