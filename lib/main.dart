@@ -5221,8 +5221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     ),
-                  )
-                ),
+                  ),
                 const SizedBox(height: 16),
                 // 统计数据
                 _buildAnimatedCard(
@@ -5272,12 +5271,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildSettingItem(Icons.info_outline, '关于我们', '版本 1.0.0', Icons.chevron_right),
                       ],
                     ),
-                  )
+                  ),
                 ),
                 const SizedBox(height: 40),
               ],
             ),
           ),
+        ),
         ],
       ),
     );
