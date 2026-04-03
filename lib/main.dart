@@ -1055,25 +1055,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
           ),
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardType,
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.white,
+              color: AppColors.neutral900,
               height: 1.5,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.neutral400,
                 fontSize: 15,
               ),
-              prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.7), size: 22),
+              prefixIcon: Icon(icon, color: AppColors.neutral500, size: 22),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
@@ -1107,29 +1106,28 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
           ),
           child: TextFormField(
             controller: controller,
             obscureText: obscureText,
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.white,
+              color: AppColors.neutral900,
               height: 1.5,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.neutral400,
                 fontSize: 15,
               ),
-              prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.7), size: 22),
+              prefixIcon: Icon(Icons.lock_outlined, color: AppColors.neutral500, size: 22),
               suffixIcon: IconButton(
                 icon: Icon(
                   obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: Colors.white.withOpacity(0.7),
+                  color: AppColors.neutral500,
                   size: 22,
                 ),
                 onPressed: onToggleVisibility,
