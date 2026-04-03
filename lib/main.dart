@@ -1531,15 +1531,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     hint: 'your@email.com',
                                     icon: Icons.email_outlined,
                                     keyboardType: TextInputType.emailAddress,
-                                    suffixAction: _canResend || !_verificationCodeSent
-                                        ? () => _handleSendVerificationCode()
-                                        : null,
-                                    suffixActionLabel: _isSendingCode
-                                        ? '发送中...'
-                                        : _canResend
-                                            ? '重新发送'
-                                            : '已发送',
-                                    suffixActionDisabled: _isSendingCode,
                                   ),
                                   const SizedBox(height: 16),
                                   // 验证码字段
@@ -1550,15 +1541,17 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     hint: '输入 6 位验证码',
                                     icon: Icons.shield_outlined,
                                     keyboardType: TextInputType.number,
-                                    suffixAction: (!_verificationCodeSent || _canResend)
+                                    suffixAction: !_verificationCodeSent || _canResend
                                         ? () => _handleSendVerificationCode()
                                         : null,
                                     suffixActionLabel: _isSendingCode
                                         ? '发送中...'
-                                        : _canResend
-                                            ? '重新发送'
-                                            : '已发送',
-                                    suffixActionDisabled: _isSendingCode || (!_canResend && _verificationCodeSent),
+                                        : !_verificationCodeSent
+                                            ? '获取验证码'
+                                            : _canResend
+                                                ? '重新发送'
+                                                : '${_countdownSeconds}s',
+                                    suffixActionDisabled: _isSendingCode,
                                   ),
                                   const SizedBox(height: 16),
                                   // 用户名字段
