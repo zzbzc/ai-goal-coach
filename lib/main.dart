@@ -3954,10 +3954,21 @@ class _CheckinScreenState extends State<CheckinScreen> {
                         _loadData();
                       }
                     } catch (e) {
+                      String errorMessage = e.toString();
+                      // 翻译英文错误信息
+                      if (errorMessage.contains('今天已经打卡过了')) {
+                        errorMessage = '今天已经打卡过了';
+                      } else if (errorMessage.contains('目标不存在')) {
+                        errorMessage = '目标不存在';
+                      } else if (errorMessage.contains('认证失败') || errorMessage.contains('登录')) {
+                        errorMessage = '请重新登录后重试';
+                      } else if (errorMessage.contains('请求失败')) {
+                        errorMessage = '网络请求失败，请检查网络连接';
+                      }
                       if (context.mounted) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('打卡失败：$e')),
+                          SnackBar(content: Text('打卡失败：$errorMessage')),
                         );
                       }
                     }
@@ -4796,9 +4807,20 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                         _loadGoalData(); // 刷新页面数据
                       }
                     } catch (e) {
+                      String errorMessage = e.toString();
+                      // 翻译英文错误信息
+                      if (errorMessage.contains('今天已经打卡过了')) {
+                        errorMessage = '今天已经打卡过了';
+                      } else if (errorMessage.contains('目标不存在')) {
+                        errorMessage = '目标不存在';
+                      } else if (errorMessage.contains('认证失败') || errorMessage.contains('登录')) {
+                        errorMessage = '请重新登录后重试';
+                      } else if (errorMessage.contains('请求失败')) {
+                        errorMessage = '网络请求失败，请检查网络连接';
+                      }
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('打卡失败：$e')),
+                          SnackBar(content: Text('打卡失败：$errorMessage')),
                         );
                       }
                     }
