@@ -2367,6 +2367,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             style: TextStyle(
               fontSize: 14,
               color: AppColors.neutral600,
+              fontWeight: FontWeight.normal,
               height: 1.5,
             ),
           ),
@@ -2842,7 +2843,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                       title,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.neutral800,
                         letterSpacing: -0.3,
                       ),
@@ -2852,6 +2853,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 13,
+                        fontWeight: FontWeight.normal,
                         color: AppColors.neutral500,
                         height: 1.3,
                       ),
