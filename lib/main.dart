@@ -5103,7 +5103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         slivers: [
           // 渐变头部
           SliverAppBar(
-            expandedHeight: 180,
+            expandedHeight: 140,
             floating: false,
             pinned: true,
             backgroundColor: AppColors.primary,
@@ -5116,36 +5116,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: Stack(
-                  children: [
-                    // 装饰性圆圈
-                    Positioned(
-                      right: -30,
-                      top: -30,
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: -20,
-                      bottom: -20,
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.08),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
+              collapseMode: CollapseMode.pin,
             ),
             actions: [
               IconButton(
@@ -5157,12 +5129,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           // 内容区域
           SliverToBoxAdapter(
-            child: Column(
-              children: [
-                // 用户信息卡片 - 部分覆盖头部
-                Transform.translate(
-                  offset: const Offset(0, -50),
-                  child: _buildAnimatedCard(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Column(
+                children: [
+                  // 用户信息卡片
+                  _buildAnimatedCard(
                     index: 0,
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -5249,7 +5221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     ),
-                  ),
+                  )
                 ),
                 const SizedBox(height: 16),
                 // 统计数据
@@ -5300,7 +5272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildSettingItem(Icons.info_outline, '关于我们', '版本 1.0.0', Icons.chevron_right),
                       ],
                     ),
-                  ),
+                  )
                 ),
                 const SizedBox(height: 40),
               ],
