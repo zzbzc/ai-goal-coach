@@ -1172,20 +1172,26 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
 
+  // 字段焦点状态
+  FocusNode _emailFocusNode = FocusNode();
+  FocusNode _usernameFocusNode = FocusNode();
+  FocusNode _passwordFocusNode = FocusNode();
+  FocusNode _verificationCodeFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.0, 0.6, curve: Curves.easeOut)),
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.0, 0.5, curve: Curves.easeOut)),
     );
 
-    _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
-      CurvedAnimation(parent: _animationController, curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic)),
+    _slideAnimation = Tween<double>(begin: 20.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: const Interval(0.1, 0.7, curve: Curves.easeOutCubic)),
     );
 
     _animationController.forward();
@@ -1198,6 +1204,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     _usernameController.dispose();
     _passwordController.dispose();
     _verificationCodeController.dispose();
+    _emailFocusNode.dispose();
+    _usernameFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _verificationCodeFocusNode.dispose();
     super.dispose();
   }
 
@@ -1209,6 +1219,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           content: const Text('请输入有效的邮箱地址'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -1238,6 +1249,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         }
       });
 
+      // 自动聚焦到验证码字段
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          FocusScope.of(context).requestFocus(_verificationCodeFocusNode);
+        }
+      });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1245,6 +1263,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.success,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -1301,7 +1320,6 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isLargeScreen = screenSize.height > 700;
 
     return Scaffold(
       body: Container(
@@ -1317,23 +1335,23 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               AppColors.primaryDark,
               Color(0xFF0D1F18),
             ],
-            stops: [0.0, 0.6, 1.0],
+            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: Stack(
           children: [
-            // 背景装饰 - 微妙的光晕
+            // 背景装饰 - 微妙的光晕效果
             Positioned(
-              top: -100,
-              right: -100,
+              top: -80,
+              right: -80,
               child: Container(
-                width: 300,
-                height: 300,
+                width: 280,
+                height: 280,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.secondary.withOpacity(0.15),
+                      AppColors.secondary.withOpacity(0.12),
                       Colors.transparent,
                     ],
                   ),
@@ -1341,127 +1359,165 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               ),
             ),
             Positioned(
-              bottom: -150,
-              left: -100,
+              bottom: -120,
+              left: -80,
               child: Container(
-                width: 400,
-                height: 400,
+                width: 360,
+                height: 360,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.tertiary.withOpacity(0.08),
+                      AppColors.tertiary.withOpacity(0.06),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
-            // 主内容
+            // 主内容区域
             SafeArea(
+              minimum: const EdgeInsets.symmetric(horizontal: 20),
               child: SingleChildScrollView(
-                child: Container(
-                  constraints: BoxConstraints(
-                    minHeight: screenSize.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
-                  ),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primary,
-                        AppColors.primaryDark,
-                        Color(0xFF0D1F18),
-                      ],
-                      stops: [0.0, 0.6, 1.0],
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenSize.width > 400 ? 40 : 24,
-                      vertical: isLargeScreen ? 40 : 24,
-                    ),
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0, 0.15),
-                          end: Offset.zero,
-                        ).animate(_slideAnimation),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Logo 区域
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.auto_awesome_rounded,
-                                size: 32,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: isLargeScreen ? 40 : 28),
-                            // 标题
-                            const Text(
-                              '创建账号',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              '开启你的目标管理之旅',
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.white.withOpacity(0.7),
-                                height: 1.5,
-                              ),
-                            ),
-                            SizedBox(height: isLargeScreen ? 48 : 36),
-                            // 错误提示
-                            if (_errorMessage != null) ...[
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.08),
+                        end: Offset.zero,
+                      ).animate(CurvedAnimation(
+                        parent: _animationController,
+                        curve: Curves.easeOutCubic,
+                      )),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 24),
+                          // Logo 和品牌标识
+                          Row(
+                            children: [
                               Container(
-                                padding: const EdgeInsets.all(12),
+                                width: 48,
+                                height: 48,
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.red.withOpacity(0.5)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        _errorMessage!,
-                                        style: const TextStyle(color: Colors.red, fontSize: 13),
-                                      ),
+                                  color: Colors.white.withOpacity(0.18),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.25),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(0.2),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
                                 ),
+                                child: const Icon(
+                                  Icons.auto_awesome_rounded,
+                                  size: 26,
+                                  color: Colors.white,
+                                ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'AI Goal Coach',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                  Text(
+                                    '开启你的目标管理之旅',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white.withOpacity(0.65),
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
-                            // 表单
-                            Form(
+                          ),
+                          const SizedBox(height: 32),
+                          // 标题
+                          const Text(
+                            '创建账号',
+                            style: TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: -0.5,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '填写以下信息开始使用，已有账号？',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white.withOpacity(0.65),
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          // 全局错误提示
+                          if (_errorMessage != null) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.red.withOpacity(0.4)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error_outline, color: Colors.red, size: 22),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                          // 表单容器 - 玻璃态卡片
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Form(
                               key: _formKey,
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // 邮箱字段
                                   _buildRegisterTextField(
                                     controller: _emailController,
-                                    label: '邮箱',
+                                    focusNode: _emailFocusNode,
+                                    label: '邮箱地址',
                                     hint: 'your@email.com',
                                     icon: Icons.email_outlined,
                                     keyboardType: TextInputType.emailAddress,
@@ -1476,26 +1532,32 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                     suffixActionDisabled: _isSendingCode || _verificationCodeSent,
                                   ),
                                   const SizedBox(height: 16),
+                                  // 验证码字段（渐进式显示）
                                   if (_verificationCodeSent) ...[
                                     _buildRegisterTextField(
                                       controller: _verificationCodeController,
+                                      focusNode: _verificationCodeFocusNode,
                                       label: '验证码',
-                                      hint: '6 位数字验证码',
+                                      hint: '输入 6 位验证码',
                                       icon: Icons.shield_outlined,
                                       keyboardType: TextInputType.number,
                                       maxLength: 6,
                                     ),
                                     const SizedBox(height: 16),
                                   ],
+                                  // 用户名字段
                                   _buildRegisterTextField(
                                     controller: _usernameController,
+                                    focusNode: _usernameFocusNode,
                                     label: '用户名',
-                                    hint: '设置一个用户名',
+                                    hint: '如何称呼你',
                                     icon: Icons.person_outlined,
                                   ),
                                   const SizedBox(height: 16),
+                                  // 密码字段
                                   _buildRegisterPasswordField(
                                     controller: _passwordController,
+                                    focusNode: _passwordFocusNode,
                                     label: '密码',
                                     hint: '至少 8 位',
                                     obscureText: _obscurePassword,
@@ -1508,103 +1570,83 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                                 ],
                               ),
                             ),
-                            SizedBox(height: isLargeScreen ? 40 : 28),
-                            // 注册按钮
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleRegister,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppColors.primary,
-                                  elevation: 8,
-                                  shadowColor: Colors.black.withOpacity(0.2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                          ),
+                          const SizedBox(height: 24),
+                          // 注册按钮 - 主操作
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _handleRegister,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: AppColors.primary,
+                                elevation: 0,
+                                shadowColor: AppColors.primary.withOpacity(0.3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                                        ),
-                                      )
-                                    : const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '立即注册',
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: 0.3,
-                                            ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                      ),
+                                    )
+                                  : const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '立即注册',
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.3,
                                           ),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_forward_rounded, size: 20),
-                                        ],
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            // 登录提示
-                            Center(
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                ),
-                                child: RichText(
-                                  text: const TextSpan(
-                                    text: '已有账号？',
-                                    style: TextStyle(fontSize: 15),
-                                    children: [
-                                      TextSpan(
-                                        text: '登录',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                          decorationThickness: 2,
                                         ),
+                                        SizedBox(width: 6),
+                                        Icon(Icons.arrow_forward_rounded, size: 20),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          // 登录链接
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              ),
+                              child: RichText(
+                                text: const TextSpan(
+                                  text: '已有账号？',
+                                  style: TextStyle(fontSize: 15, color: Colors.white70),
+                                  children: [
+                                    TextSpan(
+                                      text: '登录',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                        decorationThickness: 2,
+                                        color: Colors.white,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                            // 底部填充
-                            SizedBox(height: isLargeScreen ? 80 : 40),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                       ),
                     ),
-                  ),
-                ),
-              ),
-            ),
-            // 底部光效填充
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 100,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Color(0xFF0D1F18).withOpacity(0.5),
-                      Colors.transparent,
-                    ],
                   ),
                 ),
               ),
@@ -1617,6 +1659,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   Widget _buildRegisterTextField({
     required TextEditingController controller,
+    FocusNode? focusNode,
     required String label,
     required String hint,
     required IconData icon,
@@ -1636,18 +1679,19 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.white,
-            letterSpacing: 0.2,
+            letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: TextFormField(
             controller: controller,
+            focusNode: focusNode,
             keyboardType: keyboardType,
             maxLength: maxLength,
             style: const TextStyle(
@@ -1658,31 +1702,35 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withOpacity(0.45),
                 fontSize: 15,
               ),
-              prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.7), size: 22),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 12),
+                child: Icon(icon, color: Colors.white.withOpacity(0.7), size: 20),
+              ),
               suffixIcon: suffixAction != null
                   ? Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Material(
                         color: suffixActionDisabled
-                            ? Colors.white.withOpacity(0.1)
-                            : AppColors.secondary.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
+                            ? Colors.white.withOpacity(0.08)
+                            : AppColors.secondary.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(10),
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                           onTap: suffixActionDisabled ? null : suffixAction,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             child: Text(
                               suffixActionLabel ?? '',
                               style: TextStyle(
                                 color: suffixActionDisabled
-                                    ? Colors.white.withOpacity(0.4)
+                                    ? Colors.white.withOpacity(0.35)
                                     : AppColors.secondary,
                                 fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
                               ),
                             ),
                           ),
@@ -1702,6 +1750,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   Widget _buildRegisterPasswordField({
     required TextEditingController controller,
+    FocusNode? focusNode,
     required String label,
     required String hint,
     required bool obscureText,
@@ -1716,18 +1765,19 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.white,
-            letterSpacing: 0.2,
+            letterSpacing: 0.3,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: TextFormField(
             controller: controller,
+            focusNode: focusNode,
             obscureText: obscureText,
             style: const TextStyle(
               fontSize: 16,
@@ -1737,17 +1787,22 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withOpacity(0.45),
                 fontSize: 15,
               ),
-              prefixIcon: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.7), size: 22),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 16, right: 12),
+                child: Icon(Icons.lock_outlined, color: Colors.white.withOpacity(0.7), size: 20),
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
                   obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                   color: Colors.white.withOpacity(0.7),
-                  size: 22,
+                  size: 20,
                 ),
                 onPressed: onToggleObscure,
+                padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
