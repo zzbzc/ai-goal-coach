@@ -5101,19 +5101,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: AppColors.neutral50,
       body: CustomScrollView(
         slivers: [
-          // 渐变头部
+          // 渐变头部 - 增加高度让卡片上移 overlap
           SliverAppBar(
-            expandedHeight: 140,
+            expandedHeight: 200,
             floating: false,
             pinned: true,
-            backgroundColor: AppColors.primary,
+            backgroundColor: Colors.transparent,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryDark, AppColors.primaryLight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primaryDark,
+                      AppColors.primary.withOpacity(0.8),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.5, 1.0],
                   ),
                 ),
               ),
@@ -5127,13 +5132,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
-          // 内容区域
+          // 内容区域 - 使用负 margin 让卡片上移
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.only(top: 80),
               child: Column(
                 children: [
-                  // 用户信息卡片
+                  // 用户信息卡片 - 上移重叠到渐变区域
                   _buildAnimatedCard(
                     index: 0,
                     child: Container(
@@ -5142,7 +5147,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       decoration: BoxDecoration(
                         color: AppColors.cardBackground,
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: AppShadows.lg,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
