@@ -100,4 +100,10 @@ class GoalService {
     // 返回错误信息
     throw Exception(data['error'] ?? 'AI 计划生成失败');
   }
+
+  /// 获取已完成目标数量
+  Future<int> getCompletedGoalsCount() async {
+    final data = await _http.get('${AppConfig.goalsUrl}?status=completed');
+    return (data['items'] as List?)?.length ?? 0;
+  }
 }

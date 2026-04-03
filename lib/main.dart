@@ -4987,31 +4987,21 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   final CheckinService _checkinService = CheckinService();
+  final GoalService _goalService = GoalService();
   Map<String, dynamic>? _user;
   int _streakCount = 0;
   int _completedGoals = 0;
   int _totalCheckins = 0;
   bool _isLoading = true;
   String? _errorMessage;
-  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
     _loadUserData();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -5020,13 +5010,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       final user = await _authService.getCurrentUser();
       final streak = await _checkinService.getStreak();
       final checkins = await _checkinService.getCheckins();
+      final completedGoals = await _goalService.getCompletedGoalsCount();
       setState(() {
         _user = user;
         _streakCount = streak;
         _totalCheckins = checkins.length;
+        _completedGoals = completedGoals;
         _isLoading = false;
       });
-      _animationController.forward();
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
