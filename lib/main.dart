@@ -4987,19 +4987,31 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
   final CheckinService _checkinService = CheckinService();
   Map<String, dynamic>? _user;
   int _streakCount = 0;
   int _completedGoals = 0;
+  int _totalCheckins = 0;
   bool _isLoading = true;
   String? _errorMessage;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
     _loadUserData();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserData() async {
@@ -5007,17 +5019,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final user = await _authService.getCurrentUser();
       final streak = await _checkinService.getStreak();
+      final checkins = await _checkinService.getCheckins();
       setState(() {
         _user = user;
         _streakCount = streak;
+        _totalCheckins = checkins.length;
         _isLoading = false;
       });
+      _animationController.forward();
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
       });
     }
+  }
+
+  Widget _buildAnimatedCard({
+    required Widget child,
+    required int index,
+  }) {
+    return TweenAnimationBuilder<double>(
+      duration: Duration(milliseconds: 400 + (index * 150)),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, 20 * (1 - value)),
+          child: Opacity(
+            opacity: value,
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
   }
 
   Future<void> _handleLogout() async {
@@ -5072,91 +5107,308 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('我的'),
-        backgroundColor: Colors.transparent,
-        foregroundColor: AppColors.primary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleLogout,
-            tooltip: '登出',
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.tertiary, AppColors.warning]),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: _user?['avatar_url'] != null
-                  ? ClipOval(child: Image.network(_user!['avatar_url']!, fit: BoxFit.cover))
-                  : const Icon(Icons.person, size: 50, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _user?['username'] ?? '用户名',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.neutral900),
-            ),
-            Text(
-              _user?['email'] ?? '',
-              style: TextStyle(fontSize: 14, color: AppColors.neutral500),
-            ),
-            const SizedBox(height: 24),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+      backgroundColor: AppColors.neutral50,
+      body: CustomScrollView(
+        slivers: [
+          // 渐变头部
+          SliverAppBar(
+            expandedHeight: 180,
+            floating: false,
+            pinned: true,
+            backgroundColor: AppColors.primary,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDark, AppColors.primaryLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
                   children: [
-                    _buildStatItem('$_streakCount', '连续打卡'),
-                    _buildStatItem('$_completedGoals', '完成目标'),
-                    _buildStatItem('0', '获得成就'),
+                    // 装饰性圆圈
+                    Positioned(
+                      right: -30,
+                      top: -30,
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: -20,
+                      bottom: -20,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            Card(
-              child: Column(
-                children: [
-                  _buildSettingItem(Icons.notifications_outlined, '提醒设置'),
-                  const Divider(height: 1, indent: 60),
-                  _buildSettingItem(Icons.lock_outline, '隐私设置'),
-                  const Divider(height: 1, indent: 60),
-                  _buildSettingItem(Icons.logout, '登出', onTap: _handleLogout),
-                ],
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white),
+                onPressed: _handleLogout,
+                tooltip: '登出',
               ),
+            ],
+          ),
+          // 内容区域
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                // 用户信息卡片 - 部分覆盖头部
+                Transform.translate(
+                  offset: const Offset(0, -50),
+                  child: _buildAnimatedCard(
+                    index: 0,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: AppShadows.lg,
+                      ),
+                      child: Row(
+                        children: [
+                          // 头像
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.gradientTertiary,
+                              borderRadius: BorderRadius.circular(40),
+                              border: Border.all(color: Colors.white, width: 4),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.tertiary.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: _user?['avatar_url'] != null
+                                ? ClipOval(child: Image.network(_user!['avatar_url']!, fit: BoxFit.cover))
+                                : const Icon(Icons.person, size: 40, color: Colors.white),
+                          ),
+                          const SizedBox(width: 20),
+                          // 用户信息
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _user?['username'] ?? '用户名',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.neutral900,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _user?['email'] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.neutral500,
+                                    height: 1.4,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryContainer,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.local_fire_department_rounded, size: 14, color: AppColors.primary),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '连续 $_streakCount 天',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primaryDark,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 统计数据
+                _buildAnimatedCard(
+                  index: 1,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.cardBackground, AppColors.cardBackgroundAlt],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.neutral200.withOpacity(0.6)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatCard('🔥', '$_streakCount', '连续打卡', 0),
+                        Container(width: 1, height: 50, color: AppColors.neutral200),
+                        _buildStatCard('✅', '$_totalCheckins', '累计打卡', 1),
+                        Container(width: 1, height: 50, color: AppColors.neutral200),
+                        _buildStatCard('🎯', '$_completedGoals', '完成目标', 2),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // 设置选项
+                _buildAnimatedCard(
+                  index: 2,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBackground,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.neutral200.withOpacity(0.6)),
+                      boxShadow: AppShadows.md,
+                    ),
+                    child: Column(
+                      children: [
+                        _buildSettingItem(Icons.notifications_outlined, '消息通知', '开启每日提醒', Icons.chevron_right),
+                        Divider(height: 1, indent: 60, color: AppColors.neutral150),
+                        _buildSettingItem(Icons.schedule_rounded, '打卡时间', '设置提醒时间', Icons.chevron_right),
+                        Divider(height: 1, indent: 60, color: AppColors.neutral150),
+                        _buildSettingItem(Icons.info_outline, '关于我们', '版本 1.0.0', Icons.chevron_right),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.primary)),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 13, color: AppColors.neutral600)),
-      ],
+  Widget _buildStatCard(String emoji, String value, String label, int index) {
+    return TweenAnimationBuilder<double>(
+      duration: Duration(milliseconds: 400 + (index * 100)),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: 0.9 + (0.1 * value),
+          child: Opacity(
+            opacity: value,
+            child: child,
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          Text(
+            emoji,
+            style: const TextStyle(fontSize: 28),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.neutral500,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSettingItem(IconData icon, String title, {VoidCallback? onTap}) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(title, style: const TextStyle(color: AppColors.neutral900)),
-      trailing: Icon(Icons.chevron_right, color: AppColors.neutral400),
-      onTap: onTap ?? () {},
+  Widget _buildSettingItem(IconData icon, String title, String subtitle, IconData trailing) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primaryContainer, AppColors.secondaryContainer],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.neutral800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.neutral500,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(trailing, color: AppColors.neutral400, size: 20),
+        ],
+      ),
     );
   }
 }
