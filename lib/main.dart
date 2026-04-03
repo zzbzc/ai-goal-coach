@@ -3844,7 +3844,6 @@ class _CheckinScreenState extends State<CheckinScreen> {
   final CheckinService _checkinService = CheckinService();
   final GoalService _goalService = GoalService();
   List<dynamic> _goals = [];
-  List<dynamic> _recentCheckins = [];
   int _streakCount = 0;
   bool _isLoading = true;
   String? _errorMessage;
@@ -3859,11 +3858,9 @@ class _CheckinScreenState extends State<CheckinScreen> {
     setState(() => _isLoading = true);
     try {
       final goals = await _goalService.getGoals();
-      final checkins = await _checkinService.getCheckins();
       final streak = await _checkinService.getStreak();
       setState(() {
         _goals = goals;
-        _recentCheckins = checkins.take(5).toList();
         _streakCount = streak;
         _isLoading = false;
       });
@@ -4215,85 +4212,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                   ),
                 );
               }),
-            const SizedBox(height: 28),
-            // 最近打卡记录
-            if (_recentCheckins.isNotEmpty) ...[
-              Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.gradientTertiary,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text('最近打卡', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ..._recentCheckins.map((checkin) => Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.neutral200.withOpacity(0.5), width: 1),
-                  boxShadow: AppShadows.sm,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [AppColors.tertiaryContainer, Colors.white]),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.tertiary.withOpacity(0.2), width: 1.5),
-                        ),
-                        child: const Icon(Icons.check_circle_rounded, color: AppColors.tertiary, size: 26),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              checkin['notes'] ?? '打卡记录',
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.neutral800, letterSpacing: -0.2),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                ...(List.generate(checkin['mood_rating'] ?? 0, (i) => const Text('⭐', style: TextStyle(fontSize: 14)))),
-                                if ((checkin['mood_rating'] ?? 0) == 0)
-                                  Text('未评分', style: TextStyle(fontSize: 12, color: AppColors.neutral400)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppColors.neutral100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _formatDate(checkin['created_at']),
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.neutral600),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
             ],
-          ],
         ),
       ),
     );
