@@ -4145,6 +4145,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
       // 2. 展示 AI 生成的计划（如果有）
       final aiPlan = result['ai_plan'] as Map<String, dynamic>?;
+      debugPrint('【创建目标】ai_plan 是否为空：$aiPlan');
+      debugPrint('【创建目标】ai_plan 的键：${aiPlan?.keys.join(', ')}');
+      debugPrint('【创建目标】完整响应数据：$result');
       if (aiPlan != null && aiPlan['plan'] != null) {
         final plan = aiPlan['plan'] as Map<String, dynamic>;
         final reasoning = aiPlan['reasoning'] as String?;
