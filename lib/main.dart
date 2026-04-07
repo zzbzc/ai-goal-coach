@@ -1045,10 +1045,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: Colors.white.withOpacity(0.85),
             letterSpacing: 0.2,
           ),
         ),
@@ -1096,10 +1096,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: Colors.white.withOpacity(0.85),
             letterSpacing: 0.2,
           ),
         ),
