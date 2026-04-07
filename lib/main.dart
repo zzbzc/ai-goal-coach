@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'services/services.dart';
 
 // ==================== 设计系统颜色常量（来自 DESIGN.md）====================
@@ -5409,18 +5410,66 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.neutral200.withOpacity(0.5)),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _reasoning!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.neutral700,
-                        height: 1.6,
-                      ),
+                child: Markdown(
+                  data: _reasoning!,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  styleSheet: MarkdownStyleSheet(
+                    p: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.neutral700,
+                      height: 1.6,
                     ),
-                  ],
+                    h3: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.neutral800,
+                      height: 1.4,
+                    ),
+                    h2: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      height: 1.4,
+                    ),
+                    h1: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      height: 1.4,
+                    ),
+                    strong: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.neutral800,
+                    ),
+                    em: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                    ),
+                    listBullet: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.neutral600,
+                    ),
+                    blockquote: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.neutral600,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    blockquoteDecoration: BoxDecoration(
+                      color: AppColors.neutral100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    blockquotePadding: const EdgeInsets.all(12),
+                    code: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primaryDark,
+                      backgroundColor: AppColors.primaryContainer,
+                    ),
+                    codeblockPadding: const EdgeInsets.all(12),
+                    codeblockDecoration: BoxDecoration(
+                      color: AppColors.neutral100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 28),
