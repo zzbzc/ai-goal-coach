@@ -5219,7 +5219,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width < 360 ? 12.0 : 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
