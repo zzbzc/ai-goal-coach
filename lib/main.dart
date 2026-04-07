@@ -2382,15 +2382,21 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<_GoalsListScreenState> _goalsListKey = GlobalKey();
   final GlobalKey<_CheckinScreenState> _checkinKey = GlobalKey();
 
-  // 静态 Key，用于外部访问
-  static GlobalKey<_HomeScreenState> staticKey = GlobalKey();
+  // 静态回调，用于外部刷新首页数据
+  static VoidCallback? onRefreshGoals;
 
   _HomeScreenState() {
-    staticKey = GlobalKey(debugLabel: 'HomeScreen');
+    onRefreshGoals = refreshGoals;
   }
 
   void refreshGoals() {
     _goalsListKey.currentState?._loadGoals();
+  }
+
+  @override
+  void dispose() {
+    onRefreshGoals = null;
+    super.dispose();
   }
 
   @override
@@ -4733,6 +4739,10 @@ class _CheckinScreenState extends State<CheckinScreen> {
     final notesController = TextEditingController();
     int moodRating = 4;
 
+    // 获取当前任务（第 current_day + 1 天的任务）
+    final int currentDay = goal['current_day'] ?? 0;
+    final String todayTask = goal['today_task'] ?? '暂无任务';
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -4745,6 +4755,34 @@ class _CheckinScreenState extends State<CheckinScreen> {
               const Text('完成打卡！', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.neutral900)),
               const SizedBox(height: 8),
               Text('目标：${goal['title']}', style: TextStyle(color: AppColors.neutral600)),
+              const SizedBox(height: 20),
+              // 当前任务卡片
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.task_alt, color: AppColors.primary, size: 18),
+                        const SizedBox(width: 8),
+                        Text('第 ${currentDay + 1} 天任务', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryDark, fontSize: 13)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      todayTask,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.neutral900),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               TextField(
                 controller: notesController,
@@ -4807,7 +4845,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                         }
                         // 刷新首页数据
                         try {
-                          _HomeScreenState.staticKey.currentState?.refreshGoals();
+                          _HomeScreenState.onRefreshGoals?.call();
                         } catch (e) {
                           debugPrint('刷新首页失败：$e');
                         }
