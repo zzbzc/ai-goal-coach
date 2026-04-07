@@ -79,7 +79,7 @@ class GoalService {
   }
 
   /// AI 生成目标计划
-  Future<Map<String, dynamic>?> generateAIPlan({
+  Future<Map<String, dynamic>> generateAIPlan({
     required String title,
     String? description,
     required int durationDays,
@@ -95,7 +95,11 @@ class GoalService {
     });
     // 检查 success 字段
     if (data['success'] == true && data['plan'] != null) {
-      return data['plan'] as Map<String, dynamic>;
+      // 返回完整数据，包含 reasoning
+      return {
+        'plan': data['plan'] as Map<String, dynamic>,
+        'reasoning': data['reasoning'] as String?,
+      };
     }
     // 返回错误信息
     throw Exception(data['error'] ?? 'AI 计划生成失败');

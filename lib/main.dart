@@ -4083,9 +4083,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     });
     try {
       // 1. 先调用 AI 生成计划
-      Map<String, dynamic>? aiPlan;
+      Map<String, dynamic>? aiPlanResult;
       try {
-        aiPlan = await _goalService.generateAIPlan(
+        aiPlanResult = await _goalService.generateAIPlan(
           title: _goalController.text,
           description: null,
           durationDays: _selectedDurationDays,
@@ -4093,13 +4093,14 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           experienceLevel: _selectedLevel,
         );
         debugPrint('AI 计划生成成功！');
-        debugPrint('  - 包含的键：${aiPlan?.keys.join(', ')}');
-        debugPrint('  - daily_tasks 数量：${(aiPlan?['daily_tasks'] as List?)?.length ?? 0}');
-        debugPrint('  - weekly_plans 数量：${(aiPlan?['weekly_plans'] as List?)?.length ?? 0}');
+        debugPrint('  - 包含的键：${aiPlanResult.keys.join(', ')}');
+        final plan = aiPlanResult['plan'] as Map<String, dynamic>;
+        debugPrint('  - daily_tasks 数量：${(plan['daily_tasks'] as List?)?.length ?? 0}');
+        debugPrint('  - weekly_plans 数量：${(plan['weekly_plans'] as List?)?.length ?? 0}');
       } catch (e) {
         // AI 生成失败，继续创建目标但不显示计划
         debugPrint('AI 计划生成失败：$e');
-        aiPlan = null;
+        aiPlanResult = null;
       }
 
       // 进入下一步：创建目标
@@ -4114,16 +4115,19 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
 
       // 提取 AI 生成的 daily_tasks
       List<Map<String, dynamic>>? dailyTasks;
-      if (aiPlan != null && aiPlan['daily_tasks'] != null) {
-        dailyTasks = (aiPlan['daily_tasks'] as List).map((task) => {
-          'day_number': task['day_number'] as int,
-          'title': task['title'] as String,
-          'description': task['description'] as String?,
-          'estimated_minutes': task['estimated_minutes'] as int?,
-        }).toList();
-        debugPrint('【创建目标】daily_tasks 数量：${dailyTasks.length}');
-        if (dailyTasks.isNotEmpty) {
-          debugPrint('【创建目标】第 1 天任务：${dailyTasks[0]['title']}');
+      if (aiPlanResult != null && aiPlanResult['plan'] != null) {
+        final plan = aiPlanResult['plan'] as Map<String, dynamic>;
+        if (plan['daily_tasks'] != null) {
+          dailyTasks = (plan['daily_tasks'] as List).map((task) => {
+            'day_number': task['day_number'] as int,
+            'title': task['title'] as String,
+            'description': task['description'] as String?,
+            'estimated_minutes': task['estimated_minutes'] as int?,
+          }).toList();
+          debugPrint('【创建目标】daily_tasks 数量：${dailyTasks.length}');
+          if (dailyTasks.isNotEmpty) {
+            debugPrint('【创建目标】第 1 天任务：${dailyTasks[0]['title']}');
+          }
         }
       }
 
@@ -4147,8 +4151,18 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       });
 
       // 3. 展示 AI 生成的计划（如果有），用户关闭对话框后再关闭页面
-      if (aiPlan != null && (aiPlan.containsKey('daily_tasks') || aiPlan.containsKey('weekly_plans'))) {
-        _showAIPlanDialog(aiPlan);
+      if (aiPlanResult != null && aiPlanResult['plan'] != null) {
+        final plan = aiPlanResult['plan'] as Map<String, dynamic>;
+        if (plan.containsKey('daily_tasks') || plan.containsKey('weekly_plans')) {
+          _showAIPlanDialog(aiPlanResult);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('目标创建成功！')),
+            );
+          }
+          Navigator.pop(context, true);
+        }
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -4171,11 +4185,15 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   }
 
   // 展示 AI 计划对话框
-  void _showAIPlanDialog(Map<String, dynamic> plan) {
+  void _showAIPlanDialog(Map<String, dynamic> aiPlanResult) {
+    final plan = aiPlanResult['plan'] as Map<String, dynamic>;
+    final reasoning = aiPlanResult['reasoning'] as String?;
+
     debugPrint('【AI 计划对话框】开始展示');
     debugPrint('  - 传入的 plan 键：${plan.keys.join(', ')}');
     debugPrint('  - daily_tasks: ${(plan['daily_tasks'] as List?)?.length ?? 0} 条');
     debugPrint('  - weekly_plans: ${(plan['weekly_plans'] as List?)?.length ?? 0} 条');
+    debugPrint('  - reasoning: ${reasoning != null ? "有" : "无"}');
 
     final dailyTasks = plan['daily_tasks'] as List<dynamic>? ?? [];
     final weeklyPlans = plan['weekly_plans'] as List<dynamic>? ?? [];
@@ -4185,7 +4203,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
-          constraints: const BoxConstraints(maxHeight: 550, maxWidth: 420),
+          constraints: const BoxConstraints(maxHeight: 600, maxWidth: 420),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
@@ -4214,51 +4232,61 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                     topRight: Radius.circular(24),
                   ),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppColors.tertiary, AppColors.tertiary.withOpacity(0.8)],
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.tertiary, AppColors.tertiary.withOpacity(0.8)],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.tertiary.withOpacity(0.4),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 26),
                         ),
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.tertiary.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'AI 计划已生成',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.neutral900,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '已为你定制专属学习计划',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.neutral500,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 26),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'AI 计划已生成',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.neutral900,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '已为你定制专属学习计划',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.neutral500,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // 目标类型标签（如果有）
+                    if (reasoning != null) ...[
+                      const SizedBox(height: 16),
+                      _buildGoalTypeTag(reasoning),
+                    ],
                   ],
                 ),
               ),
@@ -4346,6 +4374,46 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                             ],
                           ),
                         )),
+                        const SizedBox(height: 20),
+                      ],
+                      // AI 思考过程（reasoning）
+                      if (reasoning != null) ...[
+                        Row(
+                          children: [
+                            Icon(Icons.psychology_rounded, size: 18, color: AppColors.tertiary),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'AI 教练的分析思路',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.neutral800,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.neutral50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.neutral200.withOpacity(0.5),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            reasoning,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.neutral700,
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 20),
                       ],
                       // 前 3 天的任务
@@ -4534,6 +4602,59 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // 构建目标类型标签
+  Widget _buildGoalTypeTag(String reasoning) {
+    // 从 reasoning 中提取目标类型
+    String goalType = '综合型目标';
+    IconData typeIcon = Icons.auto_awesome_rounded;
+    Color typeColor = AppColors.tertiary;
+
+    if (reasoning.contains('习惯养成型')) {
+      goalType = '习惯养成型';
+      typeIcon = Icons.repeat_rounded;
+      typeColor = AppColors.primary;
+    } else if (reasoning.contains('技能学习型')) {
+      goalType = '技能学习型';
+      typeIcon = Icons.school_rounded;
+      typeColor = AppColors.info;
+    } else if (reasoning.contains('项目完成型')) {
+      goalType = '项目完成型';
+      typeIcon = Icons.flag_rounded;
+      typeColor = AppColors.warning;
+    } else if (reasoning.contains('健康运动型')) {
+      goalType = '健康运动型';
+      typeIcon = Icons.fitness_center_rounded;
+      typeColor = AppColors.error;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: typeColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: typeColor.withOpacity(0.4),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(typeIcon, size: 14, color: typeColor),
+          const SizedBox(width: 6),
+          Text(
+            goalType,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: typeColor,
+            ),
+          ),
+        ],
       ),
     );
   }
