@@ -1049,7 +1049,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.85),
+            color: Colors.black,
             letterSpacing: 0.2,
           ),
         ),
@@ -1100,7 +1100,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.85),
+            color: Colors.black,
             letterSpacing: 0.2,
           ),
         ),
@@ -4116,64 +4116,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     setState(() {
       _isCreating = true;
       _createStep = 1;
-      _createMessage = '正在生成 AI 计划，预计需要 5-10 秒...';
+      _createMessage = '正在生成 AI 计划，预计需要 1-3 分钟...';
     });
     try {
-      // 1. 先调用 AI 生成计划
-      Map<String, dynamic>? aiPlanResult;
-      try {
-        aiPlanResult = await _goalService.generateAIPlan(
-          title: _goalController.text,
-          description: null,
-          durationDays: _selectedDurationDays,
-          dailyTimeAvailable: _selectedTime,
-          experienceLevel: _selectedLevel,
-        );
-        debugPrint('AI 计划生成成功！');
-        debugPrint('  - 包含的键：${aiPlanResult.keys.join(', ')}');
-        final plan = aiPlanResult['plan'] as Map<String, dynamic>;
-        debugPrint('  - daily_tasks 数量：${(plan['daily_tasks'] as List?)?.length ?? 0}');
-        debugPrint('  - weekly_plans 数量：${(plan['weekly_plans'] as List?)?.length ?? 0}');
-      } catch (e) {
-        // AI 生成失败，继续创建目标但不显示计划
-        debugPrint('AI 计划生成失败：$e');
-        aiPlanResult = null;
-      }
-
-      // 进入下一步：创建目标
-      setState(() {
-        _createStep = 2;
-        _createMessage = '正在创建目标，同步 AI 生成的任务...';
-      });
-
-      // 2. 创建目标（带上 AI 生成的任务）
+      // 1. 创建目标（后端会自动调用 AI 生成计划）
       final startDate = DateTime.now();
       final endDate = startDate.add(Duration(days: _selectedDurationDays));
-
-      // 提取 AI 生成的 daily_tasks
-      List<Map<String, dynamic>>? dailyTasks;
-      if (aiPlanResult != null && aiPlanResult['plan'] != null) {
-        final plan = aiPlanResult['plan'] as Map<String, dynamic>;
-        if (plan['daily_tasks'] != null) {
-          dailyTasks = (plan['daily_tasks'] as List).map((task) => {
-            'day_number': task['day_number'] as int,
-            'title': task['title'] as String,
-            'description': task['description'] as String?,
-            'estimated_minutes': task['estimated_minutes'] as int?,
-          }).toList();
-          debugPrint('【创建目标】daily_tasks 数量：${dailyTasks.length}');
-          if (dailyTasks.isNotEmpty) {
-            debugPrint('【创建目标】第 1 天任务：${dailyTasks[0]['title']}');
-          }
-        }
-      }
-
-      // 提取 reasoning
-      String? reasoning;
-      if (aiPlanResult != null && aiPlanResult['reasoning'] != null) {
-        reasoning = aiPlanResult['reasoning'] as String;
-        debugPrint('【创建目标】reasoning: $reasoning');
-      }
 
       final result = await _goalService.createGoal(
         title: _goalController.text,
@@ -4183,24 +4131,37 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         endDate: endDate,
         dailyTimeAvailable: _selectedTime,
         experienceLevel: _selectedLevel,
-        tasks: dailyTasks, // 传递 AI 生成的任务
-        reasoning: reasoning, // 传递 AI 的分析思路
+        // tasks 和 reasoning 由后端 AI 生成，前端不需要传递
       );
 
       debugPrint('【创建目标】后端返回：today_task=${result['today_task']}, current_day=${result['current_day']}');
+      debugPrint('【创建目标】ai_plan: ${result['ai_plan']}');
 
       // 进入完成步骤
       setState(() {
-        _createStep = 3;
+        _createStep = 2;
         _createMessage = '目标创建完成！';
       });
 
-      // 3. 展示 AI 生成的计划（如果有），用户关闭对话框后再关闭页面
-      if (aiPlanResult != null && aiPlanResult['plan'] != null) {
-        final plan = aiPlanResult['plan'] as Map<String, dynamic>;
+      // 2. 展示 AI 生成的计划（如果有）
+      final aiPlan = result['ai_plan'] as Map<String, dynamic>?;
+      if (aiPlan != null && aiPlan['plan'] != null) {
+        final plan = aiPlan['plan'] as Map<String, dynamic>;
+        final reasoning = aiPlan['reasoning'] as String?;
+
+        debugPrint('【创建目标】plan 中的键：${plan.keys.join(', ')}');
+        debugPrint('【创建目标】reasoning: ${reasoning != null ? "有" : "无"}');
+
         if (plan.containsKey('daily_tasks') || plan.containsKey('weekly_plans')) {
-          _showAIPlanDialog(aiPlanResult);
+          debugPrint('【创建目标】调用 _showAIPlanDialog');
+          if (mounted) {
+            _showAIPlanDialog(aiPlan);
+          } else {
+            debugPrint('【创建目标】widget 未 mounted，跳过对话框');
+            Navigator.pop(context, true);
+          }
         } else {
+          debugPrint('【创建目标】plan 中没有 daily_tasks 或 weekly_plans');
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('目标创建成功！')),
@@ -4209,6 +4170,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
           Navigator.pop(context, true);
         }
       } else {
+        debugPrint('【创建目标】没有 ai_plan 数据');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('目标创建成功！')),
