@@ -2378,19 +2378,41 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const GoalsListScreen(),
-    const CheckinScreen(),
-    const ProfileScreen(),
-  ];
+  final GlobalKey<_GoalsListScreenState> _goalsListKey = GlobalKey();
+  final GlobalKey<_CheckinScreenState> _checkinKey = GlobalKey();
+
+  // 静态 Key，用于外部访问
+  static GlobalKey<_HomeScreenState> staticKey = GlobalKey();
+
+  _HomeScreenState() {
+    staticKey = GlobalKey(debugLabel: 'HomeScreen');
+  }
+
+  void refreshGoals() {
+    _goalsListKey.currentState?._loadGoals();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> screens = [
+      GoalsListScreen(key: _goalsListKey),
+      CheckinScreen(key: _checkinKey),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: screens[_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        onDestinationSelected: (index) {
+          setState(() => _selectedIndex = index);
+          // 切换到首页时刷新数据
+          if (index == 0) {
+            _goalsListKey.currentState?._loadGoals();
+          } else if (index == 1) {
+            _checkinKey.currentState?.refreshData();
+          }
+        },
         backgroundColor: Colors.white,
         elevation: 8,
         shadowColor: Colors.black.withOpacity(0.1),
@@ -2424,7 +2446,7 @@ class GoalsListScreen extends StatefulWidget {
   State<GoalsListScreen> createState() => _GoalsListScreenState();
 }
 
-class _GoalsListScreenState extends State<GoalsListScreen> {
+class _GoalsListScreenState extends State<GoalsListScreen> with WidgetsBindingObserver {
   bool _hasGoals = false;
   bool _isLoading = true;
   List<dynamic> _goals = [];
@@ -2434,7 +2456,21 @@ class _GoalsListScreenState extends State<GoalsListScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadGoals();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadGoals();
+    }
   }
 
   Future<void> _loadGoals() async {
@@ -4696,6 +4732,11 @@ class _CheckinScreenState extends State<CheckinScreen> {
     _loadData();
   }
 
+  // 用于外部调用刷新数据
+  void refreshData() {
+    _loadData();
+  }
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
@@ -4789,6 +4830,12 @@ class _CheckinScreenState extends State<CheckinScreen> {
                               _goals[index]['today_task'] = updatedGoal['today_task'];
                             }
                           });
+                        }
+                        // 刷新首页数据
+                        try {
+                          _HomeScreenState.staticKey.currentState?.refreshGoals();
+                        } catch (e) {
+                          debugPrint('刷新首页失败：$e');
                         }
                         _loadData();
                       }
