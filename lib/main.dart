@@ -4167,6 +4167,13 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         }
       }
 
+      // 提取 reasoning
+      String? reasoning;
+      if (aiPlanResult != null && aiPlanResult['reasoning'] != null) {
+        reasoning = aiPlanResult['reasoning'] as String;
+        debugPrint('【创建目标】reasoning: $reasoning');
+      }
+
       final result = await _goalService.createGoal(
         title: _goalController.text,
         description: '通过 AI 辅助达成目标',
@@ -4176,6 +4183,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         dailyTimeAvailable: _selectedTime,
         experienceLevel: _selectedLevel,
         tasks: dailyTasks, // 传递 AI 生成的任务
+        reasoning: reasoning, // 传递 AI 的分析思路
       );
 
       debugPrint('【创建目标】后端返回：today_task=${result['today_task']}, current_day=${result['current_day']}');
@@ -5132,6 +5140,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
   final CheckinService _checkinService = CheckinService();
   Map<String, dynamic>? _goal;
   List<dynamic> _tasks = [];
+  String? _reasoning; // AI 的分析思路
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -5149,6 +5158,8 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
       setState(() {
         _goal = goal;
         _tasks = tasks;
+        // 从 goal 中获取 reasoning（如果后端返回）
+        _reasoning = goal['ai_plan']?['reasoning'] ?? goal['reasoning'];
         _isLoading = false;
       });
     } catch (e) {
@@ -5374,6 +5385,46 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
               ),
             ),
             const SizedBox(height: 28),
+            // AI 计划信息卡片
+            if (_reasoning != null && _reasoning!.isNotEmpty) ...[
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.gradientTertiary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text('AI 教练的分析思路', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.neutral50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.neutral200.withOpacity(0.5)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _reasoning!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.neutral700,
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+            ],
             // 任务列表
             Row(
               children: [

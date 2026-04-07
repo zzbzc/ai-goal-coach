@@ -25,6 +25,7 @@ class GoalService {
     required String dailyTimeAvailable,
     required String experienceLevel,
     List<Map<String, dynamic>>? tasks, // AI 生成的每日任务
+    String? reasoning, // AI 的分析思路
   }) async {
     final Map<String, dynamic> data = {
       'title': title,
@@ -50,6 +51,11 @@ class GoalService {
                 : null),
       }).toList();
       print('[GoalService] 发送的 tasks 数据：${data['tasks']}');
+    }
+    // 如果有 reasoning，添加到请求中（需要后端支持）
+    if (reasoning != null && reasoning.isNotEmpty) {
+      data['ai_plan'] = {'reasoning': reasoning};
+      print('[GoalService] 发送的 reasoning 数据：$reasoning');
     }
     print('[GoalService] 发送的创建目标数据：$data');
     return await _http.post(AppConfig.goalsUrl, data);
