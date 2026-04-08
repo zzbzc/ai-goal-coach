@@ -7,49 +7,50 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'services/services.dart';
 
 // ==================== 设计系统颜色常量（来自 DESIGN.md）====================
+// Flat Design Mobile (Touch-First) - UI-UX-Pro-Max 推荐
 class AppColors {
   const AppColors._();
 
-  // 主色 - 森林绿
-  static const primary = Color(0xFF2D5A46);
-  static const primaryContainer = Color(0xFFE8F5EF);
-  static const onPrimaryContainer = Color(0xFF0F1F18);
-  static const primaryDark = Color(0xFF1F3D30);
-  static const primaryLight = Color(0xFF4A7C63);
+  // 主色 - Teal (#0D9488)
+  static const primary = Color(0xFF0D9488);
+  static const primaryContainer = Color(0xFFF0FDFA);
+  static const onPrimaryContainer = Color(0xFF134E4A);
+  static const primaryDark = Color(0xFF0B7870);
+  static const primaryLight = Color(0xFF14B8A6);
 
-  // 辅色 - 鼠尾草绿
-  static const secondary = Color(0xFF87A892);
-  static const secondaryContainer = Color(0xFFD1E8DC);
-  static const secondaryLight = Color(0xFFA8C4B0);
+  // 辅色 - Teal Secondary (#14B8A6)
+  static const secondary = Color(0xFF14B8A6);
+  static const secondaryContainer = Color(0xFFE8F7F4);
+  static const secondaryLight = Color(0xFF2DD4BF);
 
-  // 点缀色 - 珊瑚红
-  static const tertiary = Color(0xFFE07A5F);
-  static const tertiaryContainer = Color(0xFFFFF5F3);
+  // 点缀色/强调色 - Orange (#EA580C)
+  static const tertiary = Color(0xFFEA580C);
+  static const tertiaryContainer = Color(0xFFFFF0EB);
   static const onTertiaryContainer = Color(0xFF3D1F18);
-  static const tertiaryLight = Color(0xFFFF9B85);
+  static const tertiaryLight = Color(0xFFF97316);
 
-  // 中性色 - 暖灰系
-  static const neutral50 = Color(0xFFFAF9F7);    // 主背景
-  static const neutral100 = Color(0xFFF2F0EB);   // 次级背景
-  static const neutral150 = Color(0xFFEAE6DD);   // 卡片背景
-  static const neutral200 = Color(0xFFE6E2D8);   // 边框/分割线
-  static const neutral300 = Color(0xFFD4CFC6);   // 弱化边框
-  static const neutral400 = Color(0xFFB5ADA0);   // 弱化文字
-  static const neutral500 = Color(0xFF998F80);   // 次级文字
-  static const neutral600 = Color(0xFF7D7265);   // 次要文字
-  static const neutral700 = Color(0xFF5C5247);   // 强调文字
-  static const neutral800 = Color(0xFF4A3D32);   // 主要文字
-  static const neutral900 = Color(0xFF3D342B);   // 主要文字（深）
+  // 中性色 - Teal 基暖灰
+  static const neutral50 = Color(0xFFF0FDFA);    // 主背景
+  static const neutral100 = Color(0xFFE8F1F4);   // 次级背景
+  static const neutral150 = Color(0xFFDCE6E9);   // 卡片背景
+  static const neutral200 = Color(0xFFC9D8DC);   // 边框/分割线
+  static const neutral300 = Color(0xFFA8C0C6);   // 弱化边框
+  static const neutral400 = Color(0xFF85A3AB);   // 弱化文字
+  static const neutral500 = Color(0xFF678791);   // 次级文字
+  static const neutral600 = Color(0xFF4D6B75);   // 次要文字
+  static const neutral700 = Color(0xFF3A525C);   // 强调文字
+  static const neutral800 = Color(0xFF2D4047);   // 主要文字
+  static const neutral900 = Color(0xFF134E4A);   // 主要文字（深/Foreground）
 
   // 语义色
-  static const success = Color(0xFF4A7C59);
-  static const warning = Color(0xFFD4A373);
-  static const error = Color(0xFFC96859);
-  static const info = Color(0xFF6B9AC4);
+  static const success = Color(0xFF0D9488);
+  static const warning = Color(0xFFEA580C);
+  static const error = Color(0xFFDC2626);
+  static const info = Color(0xFF0D9488);
 
   // 功能色 - 卡片背景/强调背景
   static const cardBackground = Color(0xFFFFFFFF);
-  static const cardBackgroundAlt = Color(0xFFF8F6F0);
+  static const cardBackgroundAlt = Color(0xFFF8FAFA);
   static const inputBackground = Color(0xFFFFFFFF);
 
   // 渐变色定义
@@ -59,12 +60,12 @@ class AppColors {
     end: Alignment.bottomRight,
   );
   static const gradientTertiary = LinearGradient(
-    colors: [tertiary, Color(0xFFD66A52)],
+    colors: [tertiary, Color(0xFFC2410C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const gradientWarm = LinearGradient(
-    colors: [Color(0xFFFFF5F3), Color(0xFFFFE8E0)],
+    colors: [Color(0xFFF0FDFA), Color(0xFFE8F1F4)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
