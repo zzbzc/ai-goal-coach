@@ -2385,18 +2385,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 静态回调，用于外部刷新首页数据
   static VoidCallback? onRefreshGoals;
+  static GlobalKey<_GoalsListScreenState>? staticGoalsListKey;
 
   _HomeScreenState() {
     onRefreshGoals = refreshGoals;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    staticGoalsListKey = _goalsListKey;
+  }
+
   void refreshGoals() {
+    debugPrint('【刷新首页】调用 refreshGoals');
     _goalsListKey.currentState?._loadGoals();
   }
 
   @override
   void dispose() {
     onRefreshGoals = null;
+    // 不清除 staticGoalsListKey，因为它需要在整个应用生命周期中保持有效
+    // staticGoalsListKey = null;
     super.dispose();
   }
 
@@ -2487,14 +2497,19 @@ class _GoalsListScreenState extends State<GoalsListScreen> with WidgetsBindingOb
       final goals = await _goalService.getGoals();
       debugPrint('【加载目标】goals 数量：${goals.length}');
       for (var goal in goals) {
-        debugPrint('  - 目标：${goal['title']}, today_task: ${goal['today_task']}, current_day: ${goal['current_day']}, duration_days: ${goal['duration_days']}');
+        final int currentDay = goal['current_day'] ?? 0;
+        final int durationDays = goal['duration_days'] ?? 0;
+        final double progress = durationDays > 0 ? currentDay / durationDays : 0.0;
+        debugPrint('  - 目标：${goal['title']}, current_day=$currentDay, duration_days=$durationDays, progress=${(progress * 100).toStringAsFixed(1)}%, today_task: ${goal['today_task']}');
       }
       setState(() {
         _goals = goals;
         _hasGoals = goals.isNotEmpty;
         _isLoading = false;
       });
+      debugPrint('【加载目标】完成，_goals 数量：${_goals.length}');
     } catch (e) {
+      debugPrint('【加载目标】失败：$e');
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -4844,11 +4859,20 @@ class _CheckinScreenState extends State<CheckinScreen> {
                             }
                           });
                         }
-                        // 刷新首页数据
+                        // 刷新首页数据 - 使用静态 GlobalKey 直接调用
                         try {
-                          _HomeScreenState.onRefreshGoals?.call();
+                          debugPrint('【打卡完成】开始刷新首页目标列表...');
+                          final goalsListState = _HomeScreenState.staticGoalsListKey?.currentState;
+                          if (goalsListState != null && goalsListState.mounted) {
+                            debugPrint('【打卡完成】GoalsListState 存在，调用 _loadGoals()');
+                            goalsListState._loadGoals();
+                          } else {
+                            debugPrint('【打卡完成】GoalsListState 不存在或未挂载，尝试通过 HomeScreen 刷新');
+                            // 如果 GoalsListScreen 未挂载，尝试通过 HomeScreen 的 refreshGoals 方法
+                            _HomeScreenState.onRefreshGoals?.call();
+                          }
                         } catch (e) {
-                          debugPrint('刷新首页失败：$e');
+                          debugPrint('【打卡完成】刷新首页失败：$e');
                         }
                         _loadData();
                       }
@@ -5159,7 +5183,10 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
     setState(() => _isLoading = true);
     try {
       final goal = await _goalService.getGoal(widget.goalId);
+      debugPrint('【目标详情】目标数据：$goal');
       final tasks = await _goalService.getGoalTasks(widget.goalId);
+      debugPrint('【目标详情】任务数据：$tasks');
+      debugPrint('【目标详情】任务数量：${tasks.length}');
       setState(() {
         _goal = goal;
         _tasks = tasks;
@@ -5168,6 +5195,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('【目标详情】加载失败：$e');
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
