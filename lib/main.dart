@@ -111,7 +111,7 @@ class AIGoalCoachApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI 目标教练',
+      title: '念达',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // Flat Design Mobile 配色系统 - Teal + Orange
@@ -451,7 +451,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         child: FadeTransition(
                           opacity: _titleFadeIn,
                           child: const Text(
-                            'AI 目标教练',
+                            '念达',
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
@@ -473,7 +473,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       FadeTransition(
                         opacity: _titleFadeIn,
                         child: Text(
-                          'AI Goal Coach',
+                          '所想及所得',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white.withOpacity(0.7),
@@ -1937,7 +1937,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       secondaryIcon: Icons.auto_awesome,
       title: '告诉我你想做什么',
       subtitle: '每一个大目标，都值得被认真对待',
-      description: '不管是读书、运动、还是学习新技能\n告诉我你的想法，AI 帮你梳理清晰',
+      description: '不管是读书、运动、还是学习新技能\n你的想法，念达帮你实现',
       gradientStart: Color(0xFF0D9488),  // Primary Teal
       gradientEnd: Color(0xFF0B5A52),    // Darker Teal
       accentColor: const Color(0xFFFFD54F),
@@ -1946,9 +1946,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     _OnboardingPageData(
       icon: Icons.auto_graph_rounded,
       secondaryIcon: Icons.timeline_outlined,
-      title: 'AI 帮你拆成每天任务',
+      title: '智能拆解每天任务',
       subtitle: '再远的目标，也能一步步到达',
-      description: 'AI 会把大目标拆成每天可做的小任务\n让你不再迷茫，知道今天该做什么',
+      description: '大目标拆成每天可做的小任务\n不再迷茫，知道今天该做什么',
       gradientStart: Color(0xFF14B8A6),  // Secondary Teal
       gradientEnd: Color(0xFF0D7870),    // Darker Secondary
       accentColor: const Color(0xFF81C784),
@@ -1957,9 +1957,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     _OnboardingPageData(
       icon: Icons.celebration_outlined,
       secondaryIcon: Icons.local_fire_department_rounded,
-      title: '每天打卡，看着自己进步',
+      title: '每天打卡见证成长',
       subtitle: '坚持的力量，超乎你的想象',
-      description: '每完成一天都是胜利\n看着连续打卡天数增长，感受积累的力量',
+      description: '每完成一天都是胜利\n看着连续打卡增长，感受积累的力量',
       gradientStart: Color(0xFFEA580C),  // Orange Accent
       gradientEnd: Color(0xFFC2410C),    // Darker Orange
       accentColor: const Color(0xFFFFD54F),
@@ -3082,7 +3082,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
   int? _customDurationDays; // 自定义持续天数
   final GoalService _goalService = GoalService();
   bool _isCreating = false;
-  int _createStep = 0; // 0=未开始，1=生成 AI 计划中，2=创建目标中，3=完成
+  int _createStep = 0; // 0=未开始，1=生成智能计划中，2=创建目标中，3=完成
   String _createMessage = '';
 
   final List<Map<String, String>> _templates = [
@@ -3554,7 +3554,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                           const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 22),
                           const SizedBox(width: 10),
                           const Text(
-                            '生成 AI 计划',
+                            '生成智能计划',
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
@@ -4138,10 +4138,10 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     setState(() {
       _isCreating = true;
       _createStep = 1;
-      _createMessage = '正在生成 AI 计划，预计需要 1-3 分钟...';
+      _createMessage = '正在生成智能计划，预计需要 1-3 分钟...';
     });
     try {
-      // 1. 创建目标（后端会自动调用 AI 生成计划）
+      // 1. 创建目标（后端会自动调用智能计划生成）
       final startDate = DateTime.now();
       final endDate = startDate.add(Duration(days: _selectedDurationDays));
 
@@ -4165,7 +4165,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         _createMessage = '目标创建完成！';
       });
 
-      // 2. 展示 AI 生成的计划（如果有）
+      // 2. 展示智能生成的计划（如果有）
       final aiPlan = result['ai_plan'] as Map<String, dynamic>?;
       debugPrint('【创建目标】ai_plan 是否为空：$aiPlan');
       debugPrint('【创建目标】ai_plan 的键：${aiPlan?.keys.join(', ')}');
@@ -4178,9 +4178,9 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
         debugPrint('【创建目标】reasoning: ${reasoning != null ? "有" : "无"}');
 
         if (plan.containsKey('daily_tasks') || plan.containsKey('weekly_plans')) {
-          debugPrint('【创建目标】调用 _showAIPlanDialog');
+          debugPrint('【创建目标】调用 _showSmartPlanDialog');
           if (mounted) {
-            _showAIPlanDialog(aiPlan);
+            _showSmartPlanDialog(aiPlan);
           } else {
             debugPrint('【创建目标】widget 未 mounted，跳过对话框');
             Navigator.pop(context, true);
@@ -4216,12 +4216,12 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
     }
   }
 
-  // 展示 AI 计划对话框
-  void _showAIPlanDialog(Map<String, dynamic> aiPlanResult) {
+  // 展示智能计划对话框
+  void _showSmartPlanDialog(Map<String, dynamic> aiPlanResult) {
     final plan = aiPlanResult['plan'] as Map<String, dynamic>;
     final reasoning = aiPlanResult['reasoning'] as String?;
 
-    debugPrint('【AI 计划对话框】开始展示');
+    debugPrint('【智能计划对话框】开始展示');
     debugPrint('  - 传入的 plan 键：${plan.keys.join(', ')}');
     debugPrint('  - daily_tasks: ${(plan['daily_tasks'] as List?)?.length ?? 0} 条');
     debugPrint('  - weekly_plans: ${(plan['weekly_plans'] as List?)?.length ?? 0} 条');
@@ -4292,7 +4292,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'AI 计划已生成',
+                                '智能计划已生成',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -4415,7 +4415,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                             Icon(Icons.psychology_rounded, size: 18, color: AppColors.tertiary),
                             const SizedBox(width: 8),
                             const Text(
-                              'AI 教练的分析思路',
+                              '智能教练的分析思路',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -4601,7 +4601,7 @@ class _CreateGoalScreenState extends State<CreateGoalScreen> {
                   height: 52,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); // 关闭 AI 计划对话框
+                      Navigator.pop(context); // 关闭智能计划对话框
                       Navigator.pop(context, true); // 关闭创建页面并返回 true
                     },
                     style: ElevatedButton.styleFrom(
@@ -5499,7 +5499,7 @@ class _GoalDetailScreenState extends State<GoalDetailScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text('AI 教练的分析思路', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
+                  const Text('智能教练的分析思路', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.neutral800, letterSpacing: -0.3)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -6345,7 +6345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Divider(height: 1, indent: 60, color: AppColors.neutral150),
                       _buildSettingItem(Icons.schedule_rounded, '打卡时间', '设置提醒时间', Icons.chevron_right),
                       Divider(height: 1, indent: 60, color: AppColors.neutral150),
-                      _buildSettingItem(Icons.info_outline, '关于我们', '版本 1.0.0', Icons.chevron_right),
+                      _buildSettingItem(Icons.info_outline, '关于念达', '版本 1.0.0-beta', Icons.chevron_right),
                     ],
                   ),
                 ),
