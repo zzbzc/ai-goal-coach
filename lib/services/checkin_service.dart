@@ -28,13 +28,17 @@ class CheckinService {
     return data['items'] ?? [];
   }
 
-  /// 获取连续打卡天数
-  Future<int> getStreak({String? goalId}) async {
+  /// 获取连续打卡天数（用户级别）
+  Future<int> getStreak() async {
     String url = '${AppConfig.checkinsUrl}/streak';
-    if (goalId != null) {
-      url += '?goal_id=$goalId';
-    }
     final data = await _http.get(url);
     return data['streak_count'] ?? 0;
+  }
+
+  /// 获取总打卡次数（所有目标打卡记录总和）
+  Future<int> getTotalCheckins() async {
+    String url = '${AppConfig.checkinsUrl}/stats/total-checkins';
+    final data = await _http.get(url);
+    return data['total_checkins'] ?? 0;
   }
 }

@@ -4719,6 +4719,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
   final GoalService _goalService = GoalService();
   List<dynamic> _goals = [];
   int _streakCount = 0;
+  int _totalCheckins = 0;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -4738,9 +4739,11 @@ class _CheckinScreenState extends State<CheckinScreen> {
     try {
       final goals = await _goalService.getGoals();
       final streak = await _checkinService.getStreak();
+      final totalCheckins = await _checkinService.getTotalCheckins();
       setState(() {
         _goals = goals;
         _streakCount = streak;
+        _totalCheckins = totalCheckins;
         _isLoading = false;
       });
     } catch (e) {
@@ -4954,46 +4957,111 @@ class _CheckinScreenState extends State<CheckinScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 连续打卡统计 - 渐变卡片
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.tertiary, AppColors.tertiaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: AppShadows.coloredTertiary,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 72,
-                    height: 72,
+            // 统计卡片区域 - 两个卡片并排
+            Row(
+              children: [
+                // 连续打卡天数卡片
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      gradient: LinearGradient(
+                        colors: [AppColors.tertiary, AppColors.tertiaryLight],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.circular(20),
+                      boxShadow: AppShadows.coloredTertiary,
                     ),
-                    child: const Icon(Icons.local_fire_department_rounded, size: 40, color: Colors.white),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.local_fire_department_rounded, size: 28, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$_streakCount',
+                                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -1),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '连续打卡天数',
+                                    style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$_streakCount',
-                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -1),
+                ),
+                const SizedBox(width: 16),
+                // 总打卡次数卡片
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.primary, AppColors.primaryLight],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '连续打卡天数',
-                        style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: AppShadows.coloredPrimary,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.check_circle_rounded, size: 28, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$_totalCheckins',
+                                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: -1),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '总打卡次数',
+                                    style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 28),
             // 我的目标
