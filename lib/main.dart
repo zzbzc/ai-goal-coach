@@ -76,17 +76,17 @@ class AppShadows {
   const AppShadows._();
 
   static List<BoxShadow> get sm => [
-    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
+    BoxShadow(color: Color(0xFF134E4A).withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
   ];
 
   static List<BoxShadow> get md => [
-    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
-    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
+    BoxShadow(color: Color(0xFF134E4A).withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4)),
+    BoxShadow(color: Color(0xFF134E4A).withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
   ];
 
   static List<BoxShadow> get lg => [
-    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.1), blurRadius: 24, offset: const Offset(0, 8)),
-    BoxShadow(color: Color(0xFF0F1F18).withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4)),
+    BoxShadow(color: Color(0xFF134E4A).withOpacity(0.1), blurRadius: 24, offset: const Offset(0, 8)),
+    BoxShadow(color: Color(0xFF134E4A).withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4)),
   ];
 
   static List<BoxShadow> get coloredPrimary => [
@@ -114,9 +114,9 @@ class AIGoalCoachApp extends StatelessWidget {
       title: 'AI 目标教练',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // 自然亲和配色系统 - 森林绿 + 暖灰 + 珊瑚红
+        // Flat Design Mobile 配色系统 - Teal + Orange
         brightness: Brightness.light,
-        // 主色：森林绿
+        // 主色：Teal
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
           primary: AppColors.primary,
@@ -126,7 +126,7 @@ class AIGoalCoachApp extends StatelessWidget {
           secondary: AppColors.secondary,
           onSecondary: Color(0xFFFFFFFF),
           secondaryContainer: AppColors.secondaryContainer,
-          onSecondaryContainer: AppColors.primaryDark,
+          onSecondaryContainer: AppColors.onPrimaryContainer,
           tertiary: AppColors.tertiary,
           onTertiary: Color(0xFFFFFFFF),
           tertiaryContainer: AppColors.tertiaryContainer,
@@ -692,7 +692,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             colors: [
               AppColors.primary,
               AppColors.primaryDark,
-              Color(0xFF0D1F18),
+              Color(0xFF0B5A52),
             ],
             stops: [0.0, 0.6, 1.0],
           ),
@@ -748,7 +748,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       colors: [
                         AppColors.primary,
                         AppColors.primaryDark,
-                        Color(0xFF0D1F18),
+                        Color(0xFF0B5A52),
                       ],
                       stops: [0.0, 0.6, 1.0],
                     ),
@@ -1021,7 +1021,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Color(0xFF0D1F18).withOpacity(0.5),
+                      Color(0xFF0B5A52).withOpacity(0.5),
                       Colors.transparent,
                     ],
                   ),
@@ -1345,7 +1345,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             colors: [
               AppColors.primary,
               AppColors.primaryDark,
-              Color(0xFF0D1F18),
+              Color(0xFF0B5A52),
             ],
             stops: [0.0, 0.5, 1.0],
           ),
@@ -1938,8 +1938,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       title: '告诉我你想做什么',
       subtitle: '每一个大目标，都值得被认真对待',
       description: '不管是读书、运动、还是学习新技能\n告诉我你的想法，AI 帮你梳理清晰',
-      gradientStart: const Color(0xFF1A4D3E),
-      gradientEnd: const Color(0xFF0D2F24),
+      gradientStart: Color(0xFF0D9488),  // Primary Teal
+      gradientEnd: Color(0xFF0B5A52),    // Darker Teal
       accentColor: const Color(0xFFFFD54F),
       blobColor: const Color(0x20FFD54F),
     ),
@@ -1949,8 +1949,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       title: 'AI 帮你拆成每天任务',
       subtitle: '再远的目标，也能一步步到达',
       description: 'AI 会把大目标拆成每天可做的小任务\n让你不再迷茫，知道今天该做什么',
-      gradientStart: const Color(0xFF2D5A46),
-      gradientEnd: const Color(0xFF1A3A2E),
+      gradientStart: Color(0xFF14B8A6),  // Secondary Teal
+      gradientEnd: Color(0xFF0D7870),    // Darker Secondary
       accentColor: const Color(0xFF81C784),
       blobColor: const Color(0x2081C784),
     ),
@@ -1960,10 +1960,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
       title: '每天打卡，看着自己进步',
       subtitle: '坚持的力量，超乎你的想象',
       description: '每完成一天都是胜利\n看着连续打卡天数增长，感受积累的力量',
-      gradientStart: const Color(0xFF3D6B52),
-      gradientEnd: const Color(0xFF2D4A3A),
-      accentColor: const Color(0xFFE07A5F),
-      blobColor: const Color(0x20E07A5F),
+      gradientStart: Color(0xFFEA580C),  // Orange Accent
+      gradientEnd: Color(0xFFC2410C),    // Darker Orange
+      accentColor: const Color(0xFFFFD54F),
+      blobColor: const Color(0x20FFD54F),
     ),
   ];
 
@@ -1971,15 +1971,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
   void initState() {
     super.initState();
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1500),  // 加快脉冲动画
       vsync: this,
     )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(  // 减小脉冲幅度
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     _floatController = AnimationController(
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 2000),  // 加快浮动动画
       vsync: this,
     )..repeat(reverse: true);
     _floatAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -2293,7 +2293,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
                                         (context, animation, secondaryAnimation, child) {
                                       return FadeTransition(opacity: animation, child: child);
                                     },
-                                    transitionDuration: const Duration(milliseconds: 600),
+                                    transitionDuration: const Duration(milliseconds: 300),
                                   ),
                                 );
                               }
